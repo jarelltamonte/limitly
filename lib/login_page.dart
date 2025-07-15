@@ -133,6 +133,7 @@ class _LoginPageState extends State<LoginPage> {
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.white,
+                            fontFamily: 'Poppins',
                           ),
                         ),
                       ),
@@ -143,15 +144,19 @@ class _LoginPageState extends State<LoginPage> {
                         children: [
                           RichText(
                             text: TextSpan(
-                              style: const TextStyle(color: Colors.black),
+                              style: const TextStyle(color: Colors.black, fontFamily: 'Poppins'),
                               children: [
-                                const TextSpan(text: "Don't have an account? "),
+                                const TextSpan(
+                                  text: "Don't have an account? ",
+                                  style: TextStyle(fontFamily: 'Poppins'),
+                                ),
                                 TextSpan(
                                   text: 'Sign Up',
                                   style: const TextStyle(
                                     decoration: TextDecoration.underline,
                                     color: Color(0xFF005F3C),
                                     fontWeight: FontWeight.bold,
+                                    fontFamily: 'Poppins',
                                   ),
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
