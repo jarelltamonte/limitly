@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:limitly_development/signup_page.dart';
+import 'package:limitly_development/forgot.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -223,7 +224,7 @@ class _LoginPageState extends State<LoginPage> {
                                 child: Padding(
                                   padding: EdgeInsets.all(8.0),
                                   child: Image.network(
-                                    'https://en.m.wikipedia.org/wiki/File:Google_%22G%22_logo.svg#/media/File%3AGoogle_Favicon_2025.svg',
+                                    "https://commons.wikimedia.org/wiki/File:Google_%22G%22_logo.svg#/media/File:Google_%22G%22_logo.svg",
                                     fit: BoxFit.contain,
                                   ),
                                 ),
@@ -252,6 +253,26 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                             ],
+                          ),
+                          const SizedBox(height: 16),
+                          RichText(
+                            text: TextSpan(
+                              text: 'Forgot Password?',
+                              style: const TextStyle(
+                                decoration: TextDecoration.underline,
+                                color: Color(0xFF005F3C),
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const ForgotPage()),
+                                  );
+                                },
+                            ),
                           ),
                         ],
                       ),
