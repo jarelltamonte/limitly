@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/expense_service.dart';
+import '../services/savings_service.dart';
 import '../intro.dart';
 import 'category_detail.dart';
 import 'add_expense.dart';
-import 'savings_dashboard.dart';
+import 'add_savings.dart';
+import 'savings_category_detail.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -16,6 +18,7 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   final AuthService _authService = AuthService();
   final ExpenseService _expenseService = ExpenseService();
+  final SavingsService _savingsService = SavingsService();
   int _currentIndex = 3; // Categories tab is selected
 
   @override
@@ -143,50 +146,11 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
 
-          // Categories Grid
+          // Content based on selected tab
           Expanded(
-            child: Container(
-              color: lightGreen,
-              padding: const EdgeInsets.all(24),
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 1.0,
-                ),
-                itemCount: _expenseService.categories.length + 1, // +1 for Add New Category
-                itemBuilder: (context, index) {
-                  if (index == _expenseService.categories.length) {
-                    // Add New Category button
-                    return _buildCategoryCard(
-                      icon: Icons.add,
-                      title: 'Add New\nCategory',
-                      onTap: () {
-                        _showAddCategoryDialog(context);
-                      },
-                    );
-                  }
-
-                  final category = _expenseService.categories[index];
-                  final totalAmount = _expenseService.getTotalExpenseByCategory(category);
-                  
-                  return _buildCategoryCard(
-                    icon: _getCategoryIcon(category),
-                    title: category,
-                    subtitle: '\$${totalAmount.toStringAsFixed(2)}',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CategoryDetail(category: category),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
+            child: _currentIndex == 4 
+                ? _buildSavingsContent() 
+                : _buildExpensesContent(),
           ),
 
           // Bottom Navigation
@@ -278,10 +242,9 @@ class _DashboardState extends State<Dashboard> {
         if (index == 5) { // Profile tab
           _showProfileOptions(context);
         } else if (index == 4) { // Savings tab
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const SavingsDashboard()),
-          );
+          setState(() {
+            _currentIndex = index;
+          });
         } else {
           setState(() {
             _currentIndex = index;
@@ -373,6 +336,260 @@ class _DashboardState extends State<Dashboard> {
       default:
         return Icons.category;
     }
+  }
+
+  Widget _buildExpensesContent() {
+    final lightGreen = const Color(0xFFEAF8EF);
+    
+    return Container(
+      color: lightGreen,
+      padding: const EdgeInsets.all(24),
+      child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 1.0,
+        ),
+        itemCount: _expenseService.categories.length + 1, // +1 for Add New Category
+        itemBuilder: (context, index) {
+          if (index == _expenseService.categories.length) {
+            // Add New Category button
+            return _buildCategoryCard(
+              icon: Icons.add,
+              title: 'Add New\nCategory',
+              onTap: () {
+                _showAddCategoryDialog(context);
+              },
+            );
+          }
+
+          final category = _expenseService.categories[index];
+          final totalAmount = _expenseService.getTotalExpenseByCategory(category);
+          
+          return _buildCategoryCard(
+            icon: _getCategoryIcon(category),
+            title: category,
+            subtitle: '\$${totalAmount.toStringAsFixed(2)}',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CategoryDetail(category: category),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSavingsContent() {
+    final lightGreen = const Color(0xFFEAF8EF);
+    final lightBlue = const Color(0xFFE3F2FD);
+    
+    return Container(
+      color: lightGreen,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          // Title
+          const Text(
+            'Savings',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Poppins',
+              color: Color(0xFF006231),
+            ),
+          ),
+          const SizedBox(height: 20),
+          
+          // Categories Grid
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 1.0,
+              ),
+              itemCount: _savingsService.categories.length,
+              itemBuilder: (context, index) {
+                final category = _savingsService.categories[index];
+                final totalAmount = _savingsService.getTotalSavingsByCategory(category);
+                
+                return _buildSavingsCard(
+                  icon: _getSavingsCategoryIcon(category),
+                  title: category,
+                  amount: totalAmount,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SavingsCategoryDetail(category: category),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+
+          // Add More button
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF006231),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+              ),
+              onPressed: () {
+                _showAddSavingsCategoryDialog(context);
+              },
+              child: const Text(
+                'Add More',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSavingsCard({
+    required IconData icon,
+    required String title,
+    required double amount,
+    required VoidCallback onTap,
+  }) {
+    final lightBlue = const Color(0xFFE3F2FD);
+    final darkBlue = const Color(0xFF1976D2);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: lightBlue,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 48,
+              color: darkBlue,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
+                color: Color(0xFF1976D2),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '\$${amount.toStringAsFixed(2)}',
+              style: const TextStyle(
+                fontSize: 14,
+                fontFamily: 'Poppins',
+                color: Color(0xFF1976D2),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  IconData _getSavingsCategoryIcon(String category) {
+    switch (category.toLowerCase()) {
+      case 'travel':
+        return Icons.flight;
+      case 'house':
+        return Icons.home;
+      case 'car':
+        return Icons.directions_car;
+      case 'wedding':
+        return Icons.favorite;
+      default:
+        return Icons.savings;
+    }
+  }
+
+  void _showAddSavingsCategoryDialog(BuildContext context) {
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController targetController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add New Savings Category'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Category Name',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: targetController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Target Amount',
+                prefixText: '\$',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (nameController.text.isNotEmpty && targetController.text.isNotEmpty) {
+                final targetAmount = double.tryParse(targetController.text);
+                if (targetAmount != null && targetAmount > 0) {
+                  await _savingsService.addCategory(nameController.text, targetAmount);
+                  setState(() {});
+                  Navigator.pop(context);
+                }
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showAddCategoryDialog(BuildContext context) {

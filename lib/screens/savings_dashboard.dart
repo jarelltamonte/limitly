@@ -301,7 +301,10 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
         if (index == 5) { // Profile tab
           _showProfileOptions(context);
         } else if (index == 3) { // Categories tab - go back to expenses
-          Navigator.pop(context);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Dashboard()),
+          );
         } else {
           setState(() {
             _currentIndex = index;
