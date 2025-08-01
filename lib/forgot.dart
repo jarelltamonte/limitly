@@ -1,6 +1,7 @@
 // forgot.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../services/auth_service.dart';
 
 class ForgotPage extends StatefulWidget {
   const ForgotPage({super.key});
@@ -16,6 +17,8 @@ class _ForgotPageState extends State<ForgotPage> {
 
   bool _showPassword = false;
   bool _showConfirmPassword = false;
+  bool _isLoading = false;
+  final AuthService _authService = AuthService();
 
   @override
   void dispose() {
@@ -25,7 +28,7 @@ class _ForgotPageState extends State<ForgotPage> {
     super.dispose();
   }
 
-  void _resetPassword() {
+  Future<void> _resetPassword() async {
     // Basic validation
     if (_emailController.text.isEmpty ||
         _passwordController.text.isEmpty ||
@@ -43,18 +46,44 @@ class _ForgotPageState extends State<ForgotPage> {
       return;
     }
 
-    // TODO: Implement the actual password reset logic here.
-    // This would typically involve making an API call to your backend.
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Password has been reset successfully!')),
-    );
-    // Navigate back to the login page after a short delay
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        Navigator.pop(context);
-      }
+    setState(() {
+      _isLoading = true;
     });
+
+    try {
+      final success = await _authService.resetPassword(
+        _emailController.text,
+        _passwordController.text,
+      );
+
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Password has been reset successfully!')),
+        );
+        // Navigate back to the login page after a short delay
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) {
+            Navigator.pop(context);
+          }
+        });
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Password reset failed. Please try again.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -153,15 +182,24 @@ class _ForgotPageState extends State<ForgotPage> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        onPressed: _resetPassword,
-                        child: const Text(
-                          'Reset Password',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
+                        onPressed: _isLoading ? null : _resetPassword,
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Reset Password',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
                       ),
                     ),
                   ],
