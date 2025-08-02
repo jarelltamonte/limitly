@@ -27,7 +27,7 @@ class _CategoryDetailState extends State<CategoryDetail> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // Header with balance and progress (same as dashboard)
+          // Header with back button, balance, and progress
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(24),
@@ -38,100 +38,91 @@ class _CategoryDetailState extends State<CategoryDetail> {
                 bottomRight: Radius.circular(30),
               ),
             ),
-            child: Stack(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 40),
+                // Back button at the top
+                IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                const SizedBox(height: 8),
+                // Balance section
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const SizedBox(height: 40),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Total Balance',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '\$${_authService.currentUser?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            const Text(
-                              'Total Expense',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '-\$${_authService.currentUser?.totalExpense.toStringAsFixed(2) ?? '0.00'}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    // Progress bar
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '${_authService.currentUser?.progressPercentage.toStringAsFixed(0) ?? '0'}%',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                            Text(
-                              'Target: \$${_authService.currentUser?.targetAmount.toStringAsFixed(2) ?? '0.00'}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                          ],
+                        const Text(
+                          'Total Balance',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        LinearProgressIndicator(
-                          value: (_authService.currentUser?.progressPercentage ?? 0) / 100,
-                          backgroundColor: Colors.white.withOpacity(0.3),
-                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                          minHeight: 8,
-                        ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 4),
                         Text(
-                          '${_authService.currentUser?.progressPercentage.toStringAsFixed(0) ?? '0'}% Of Your Expenses, Looks Good',
+                          '\$${_authService.currentUser?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Text(
+                          'Total Expense',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '-\$${_authService.currentUser?.totalExpense.toStringAsFixed(2) ?? '0.00'}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                // Progress bar
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${_authService.currentUser?.progressPercentage.toStringAsFixed(0) ?? '0'}%',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                        Text(
+                          'Target: \$${_authService.currentUser?.targetAmount.toStringAsFixed(2) ?? '0.00'}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
@@ -140,20 +131,23 @@ class _CategoryDetailState extends State<CategoryDetail> {
                         ),
                       ],
                     ),
-                  ],
-                ),
-                // Back button
-                Positioned(
-                  top: 40,
-                  left: 0,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                      size: 24,
+                    const SizedBox(height: 8),
+                    LinearProgressIndicator(
+                      value: (_authService.currentUser?.progressPercentage ?? 0) / 100,
+                      backgroundColor: Colors.white.withOpacity(0.3),
+                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                      minHeight: 8,
                     ),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Your Expenses, Looks Good',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -344,4 +338,4 @@ class _CategoryDetailState extends State<CategoryDetail> {
     ];
     return '${months[date.month - 1]} ${date.day.toString().padLeft(2, '0')}';
   }
-} 
+}

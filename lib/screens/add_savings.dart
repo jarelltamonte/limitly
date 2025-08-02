@@ -78,8 +78,8 @@ class _AddSavingsState extends State<AddSavings> {
     );
     if (picked != null) {
       setState(() {
-        _selectedDate = picked;
-        _dateController.text = _formatDate(picked);
+        _selectedDate = picked!; // ✅ Assert non-null
+        _dateController.text = _formatDate(picked!);
       });
     }
   }

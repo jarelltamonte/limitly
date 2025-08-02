@@ -50,9 +50,9 @@ class _AddExpenseState extends State<AddExpense> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
-    if (picked != null) {
+      if (picked != null) {
       setState(() {
-        _selectedDate = picked;
+        _selectedDate = picked!; // ✅ Dart now knows it's non-null
         _dateController.text = _formatDate(picked);
       });
     }

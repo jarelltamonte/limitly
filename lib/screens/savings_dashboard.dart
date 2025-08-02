@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/savings_service.dart';
 import '../intro.dart';
+import '../analysis_page.dart';
 import 'savings_category_detail.dart';
-import 'add_savings.dart';
 import 'dashboard.dart';
 
 class SavingsDashboard extends StatefulWidget {
@@ -59,7 +59,7 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '\$${_authService.currentUser?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
+                          '\₱${_authService.currentUser?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -82,7 +82,7 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '\$${_savingsService.getTotalSavings().toStringAsFixed(2)}',
+                          '\₱${_savingsService.getTotalSavings().toStringAsFixed(2)}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -112,7 +112,7 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
                           ),
                         ),
                         const Text(
-                          'Target: \$20,000.00',
+                          'Target: \₱20,000.00',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 14,
@@ -279,7 +279,7 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
             ),
             const SizedBox(height: 8),
             Text(
-              '\$${amount.toStringAsFixed(2)}',
+              '\₱${amount.toStringAsFixed(2)}',
               style: const TextStyle(
                 fontSize: 14,
                 fontFamily: 'Poppins',
@@ -380,7 +380,7 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
                 labelText: 'Target Amount',
-                prefixText: '\$',
+                prefixText: '\₱',
                 border: OutlineInputBorder(),
               ),
             ),

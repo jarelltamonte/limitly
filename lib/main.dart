@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:limitly_development/login_page.dart';
 import 'package:limitly_development/intro.dart';
 import 'package:limitly_development/services/auth_service.dart';
 import 'package:limitly_development/screens/dashboard.dart';
