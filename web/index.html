@@ -34,5 +34,21 @@
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAX37swk-j2nVenyV2x5DJA9A_ZCzF_TMU",
+      authDomain: "limitly-f5acc.firebaseapp.com",
+      projectId: "limitly-f5acc",
+      storageBucket: "limitly-f5acc.appspot.com",
+      messagingSenderId: "296728430407",
+      appId: "1:296728430407:web:8dbf5a2fe108d39800ee62"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </body>
 </html>

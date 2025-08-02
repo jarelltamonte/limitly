@@ -1,9 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../models/savings.dart';
 
 class SavingsService {
   static final SavingsService _instance = SavingsService._internal();
   factory SavingsService() => _instance;
   SavingsService._internal();
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final List<Savings> _savings = [
     // Travel savings
@@ -154,24 +158,45 @@ class SavingsService {
     return (total / target) * 100;
   }
 
+  Future<void> loadSavings() async {
+    final snapshot = await _firestore.collection('savings').get();
+    _savings.clear();
+    for (var doc in snapshot.docs) {
+      _savings.add(Savings.fromJson(doc.data()));
+    }
+  }
+
+  Future<void> loadCategories() async {
+    final snapshot = await _firestore.collection('savings_categories').get();
+    _categories.clear();
+    _targetAmounts.clear();
+    for (var doc in snapshot.docs) {
+      _categories.add(doc['name']);
+      _targetAmounts[doc['name']] = doc['targetAmount'] ?? 0.0;
+    }
+  }
+
   Future<void> addSavings(Savings saving) async {
-    // Simulate API call delay
-    await Future.delayed(const Duration(milliseconds: 500));
+    await _firestore.collection('savings').doc(saving.id).set(saving.toJson());
     _savings.add(saving);
   }
 
   Future<void> deleteSavings(String id) async {
-    // Simulate API call delay
-    await Future.delayed(const Duration(milliseconds: 500));
+    await _firestore.collection('savings').doc(id).delete();
     _savings.removeWhere((saving) => saving.id == id);
   }
 
   Future<void> addCategory(String category, double targetAmount) async {
-    // Simulate API call delay
-    await Future.delayed(const Duration(milliseconds: 500));
     if (!_categories.contains(category)) {
+      await _firestore.collection('savings_categories').add({'name': category, 'targetAmount': targetAmount});
       _categories.add(category);
       _targetAmounts[category] = targetAmount;
     }
   }
-} 
+
+  // Call these on app start to load data
+  Future<void> initialize() async {
+    await loadCategories();
+    await loadSavings();
+  }
+}

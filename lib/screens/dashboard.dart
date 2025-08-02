@@ -4,8 +4,6 @@ import '../services/expense_service.dart';
 import '../services/savings_service.dart';
 import '../intro.dart';
 import 'category_detail.dart';
-import 'add_expense.dart';
-import 'add_savings.dart';
 import 'savings_category_detail.dart';
 
 class Dashboard extends StatefulWidget {

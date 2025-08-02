@@ -29,8 +29,8 @@ class _AddExpenseState extends State<AddExpense> {
     _selectedCategory = widget.selectedCategory;
     _dateController.text = _formatDate(_selectedDate);
     _categoryController.text = _selectedCategory ?? '';
-    _amountController.text = '26.00';
-    _titleController.text = 'Dinner';
+    _amountController.text = '';
+    _titleController.text = '';
   }
 
   @override
@@ -331,4 +331,4 @@ class _AddExpenseState extends State<AddExpense> {
       ),
     );
   }
-} 
+}
