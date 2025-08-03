@@ -4,11 +4,11 @@ import '../services/expense_service.dart';
 import '../services/savings_service.dart';
 import '../intro.dart';
 import 'category_detail.dart';
-import 'add_expense.dart';
-import 'add_savings.dart';
+// ...existing code...
 import 'savings_category_detail.dart';
-import 'analysis_page.dart'; 
+import 'analysis_page.dart';
 import 'transactions_page.dart';
+import 'profile_page.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -27,7 +27,7 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     final darkGreen = const Color(0xFF006231);
     final lightGreen = const Color(0xFFEAF8EF);
-    final lightBlue = const Color(0xFFE3F2FD);
+    // ...existing code...
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -36,7 +36,7 @@ class _DashboardState extends State<Dashboard> {
           // Header with balance and progress
           if (_currentIndex == 0)
             _buildHomeHeader()
-          else
+          else if (_currentIndex != 1)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
@@ -50,30 +50,49 @@ class _DashboardState extends State<Dashboard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 40),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
                         children: [
-                          const Text(
-                            'Total Balance',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '\₱${_authService.currentUser?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Poppins',
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Total Balance',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Text(
+                                    '₱${_authService.currentUser?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.refresh,
+                                      color: Colors.white,
+                                      size: 22,
+                                    ),
+                                    tooltip: 'Refresh',
+                                    onPressed: () {
+                                      setState(() {});
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -90,7 +109,7 @@ class _DashboardState extends State<Dashboard> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '-\₱${_authService.currentUser?.totalExpense.toStringAsFixed(2) ?? '0.00'}',
+                            '-₱${_authService.currentUser?.totalExpense.toStringAsFixed(2) ?? '0.00'}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 24,
@@ -103,7 +122,6 @@ class _DashboardState extends State<Dashboard> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  // Progress bar
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -120,7 +138,7 @@ class _DashboardState extends State<Dashboard> {
                             ),
                           ),
                           Text(
-                            'Target: \₱${_authService.currentUser?.targetAmount.toStringAsFixed(2) ?? '0.00'}',
+                            'Target: ₱${_authService.currentUser?.targetAmount.toStringAsFixed(2) ?? '0.00'}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -132,9 +150,12 @@ class _DashboardState extends State<Dashboard> {
                       const SizedBox(height: 8),
                       LinearProgressIndicator(
                         value:
-                            (_authService.currentUser?.progressPercentage ??
-                                0) /
-                            100,
+                            (_authService.currentUser?.targetAmount ?? 0) == 0
+                                ? 0.0
+                                : ((_authService.currentUser?.totalExpense ??
+                                        0) /
+                                    (_authService.currentUser?.targetAmount ??
+                                        20000.0)),
                         backgroundColor: Colors.white.withOpacity(0.3),
                         valueColor: const AlwaysStoppedAnimation<Color>(
                           Colors.white,
@@ -142,7 +163,8 @@ class _DashboardState extends State<Dashboard> {
                         minHeight: 8,
                       ),
                       const SizedBox(height: 8),
-                      Text('Your Expenses, Looks Good',
+                      Text(
+                        'Your Expenses, Looks Good',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -159,6 +181,10 @@ class _DashboardState extends State<Dashboard> {
             child:
                 _currentIndex == 0
                     ? _buildHomeContent()
+                    : _currentIndex == 1
+                    ? const AnalysisPage()
+                    : _currentIndex == 2
+                    ? const TransactionsPage()
                     : _currentIndex == 4
                     ? _buildSavingsContent()
                     : _buildExpensesContent(),
@@ -190,8 +216,9 @@ class _DashboardState extends State<Dashboard> {
     String? subtitle,
     required VoidCallback onTap,
   }) {
-    final lightBlue = const Color(0xFFE3F2FD);
+    // ...existing code...
     final darkBlue = const Color(0xFF1976D2);
+    final lightBlue = const Color(0xFFE3F2FD);
 
     return GestureDetector(
       onTap: onTap,
@@ -246,31 +273,7 @@ class _DashboardState extends State<Dashboard> {
     return GestureDetector(
       onTap: () {
         if (index == 5) {
-          // Profile tab
           _showProfileOptions(context);
-        } else if (index == 4) {
-          // Savings tab
-          setState(() {
-            _currentIndex = index;
-          });
-        } else if (index == 3) {
-          setState(() {
-            _currentIndex = index;
-          });
-        } else if (index == 2) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const TransactionsPage(),
-        ),
-      );
-        } else if (index == 1) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AnalysisPage(),
-        ),
-      );
         } else {
           setState(() {
             _currentIndex = index;
@@ -321,7 +324,12 @@ class _DashboardState extends State<Dashboard> {
                   title: const Text('Profile'),
                   onTap: () {
                     Navigator.pop(context);
-                    // TODO: Navigate to profile screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProfilePage(),
+                      ),
+                    );
                   },
                 ),
                 ListTile(
@@ -402,7 +410,7 @@ class _DashboardState extends State<Dashboard> {
           return _buildCategoryCard(
             icon: _getCategoryIcon(category),
             title: category,
-            subtitle: '\₱${totalAmount.toStringAsFixed(2)}',
+            subtitle: '₱${totalAmount.toStringAsFixed(2)}',
             onTap: () {
               Navigator.push(
                 context,
@@ -419,7 +427,6 @@ class _DashboardState extends State<Dashboard> {
 
   Widget _buildSavingsContent() {
     final lightGreen = const Color(0xFFEAF8EF);
-    final lightBlue = const Color(0xFFE3F2FD);
 
     return Container(
       color: lightGreen,
@@ -543,7 +550,7 @@ class _DashboardState extends State<Dashboard> {
             ),
             const SizedBox(height: 8),
             Text(
-              '\₱${amount.toStringAsFixed(2)}',
+              '₱${amount.toStringAsFixed(2)}',
               style: const TextStyle(
                 fontSize: 14,
                 fontFamily: 'Poppins',
@@ -596,7 +603,7 @@ class _DashboardState extends State<Dashboard> {
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     labelText: 'Target Amount',
-                    prefixText: '\₱',
+                    prefixText: '₱',
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -714,7 +721,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '\₱${_authService.currentUser?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
+                    '₱${_authService.currentUser?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -737,7 +744,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '-\₱${_authService.currentUser?.totalExpense.toStringAsFixed(2) ?? '0.00'}',
+                    '-₱${_authService.currentUser?.totalExpense.toStringAsFixed(2) ?? '0.00'}',
                     style: const TextStyle(
                       color: Color(0xFFFFD700),
                       fontSize: 24,
@@ -783,7 +790,7 @@ class _DashboardState extends State<Dashboard> {
               ),
               const SizedBox(width: 8),
               Text(
-                '\₱${_authService.currentUser?.targetAmount.toStringAsFixed(2) ?? '0.00'}',
+                '₱${_authService.currentUser?.targetAmount.toStringAsFixed(2) ?? '0.00'}',
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -926,7 +933,7 @@ class _DashboardState extends State<Dashboard> {
                                 ),
                               ),
                               Text(
-                                '\₱4,000.00',
+                                '₱4,000.00',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Poppins',
@@ -958,7 +965,7 @@ class _DashboardState extends State<Dashboard> {
                                 ),
                               ),
                               Text(
-                                '-\₱100.00',
+                                '-₱100.00',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Poppins',
@@ -1035,7 +1042,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   Text(
                     (tx['isIncome'] as bool ? '+' : '') +
-                        '\₱${(tx['amount'] as num).abs().toStringAsFixed(2)}',
+                        '₱${(tx['amount'] as num).abs().toStringAsFixed(2)}',
                     style: TextStyle(
                       color: tx['isIncome'] as bool ? darkGreen : yellow,
                       fontWeight: FontWeight.bold,

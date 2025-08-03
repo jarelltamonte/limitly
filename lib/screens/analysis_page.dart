@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 
 class AnalysisPage extends StatelessWidget {
   const AnalysisPage({super.key});
@@ -41,12 +42,11 @@ class AnalysisPage extends StatelessWidget {
   }
 
   Widget _buildUpperSection() {
-    // Placeholder data for demonstration
     const double goalBudget = 30000.00;
-    const double totalExpenses = 32500.50; // Set higher than goal to show red color
-
+    final double totalExpenses = AuthService().currentUser?.totalExpense ?? 0.0;
     final bool isOverBudget = totalExpenses > goalBudget;
-    final Color currentExpenseColor = isOverBudget ? Colors.redAccent : expenseColor;
+    final Color currentExpenseColor =
+        isOverBudget ? Colors.redAccent : expenseColor;
 
     return Container(
       color: darkGreen,
@@ -132,11 +132,7 @@ class AnalysisPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              Expanded(
-                child: BarChart(
-                  _buildBarChartData(),
-                ),
-              ),
+              Expanded(child: BarChart(_buildBarChartData())),
             ],
           ),
         ),
@@ -189,11 +185,14 @@ class AnalysisPage extends StatelessWidget {
               return SideTitleWidget(
                 axisSide: meta.axisSide,
                 space: 8.0,
-                child: Text(_getWeekLabel(value.toInt()),
-                    style: const TextStyle(
-                        color: darkGreen,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14)),
+                child: Text(
+                  _getWeekLabel(value.toInt()),
+                  style: const TextStyle(
+                    color: darkGreen,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
               );
             },
             reservedSize: 38,
@@ -205,19 +204,21 @@ class AnalysisPage extends StatelessWidget {
             reservedSize: 40,
             getTitlesWidget: (value, meta) {
               if (value % 2500 == 0 && value > 0) {
-                return Text('${(value / 1000).toStringAsFixed(0)}k',
-                    style: const TextStyle(color: darkGreen, fontSize: 12));
+                return Text(
+                  '${(value / 1000).toStringAsFixed(0)}k',
+                  style: const TextStyle(color: darkGreen, fontSize: 12),
+                );
               }
               return const Text('');
             },
           ),
         ),
         topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        rightTitles: const AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
       ),
-      borderData: FlBorderData(
-        show: false,
-      ),
+      borderData: FlBorderData(show: false),
       barGroups: List.generate(4, (i) {
         return BarChartGroupData(
           x: i,

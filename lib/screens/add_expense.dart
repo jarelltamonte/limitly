@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/expense.dart';
 import '../services/expense_service.dart';
+import '../services/auth_service.dart';
 
 class AddExpense extends StatefulWidget {
   final String? selectedCategory;
@@ -18,7 +19,7 @@ class _AddExpenseState extends State<AddExpense> {
   final _amountController = TextEditingController();
   final _titleController = TextEditingController();
   final _messageController = TextEditingController();
-  
+
   final ExpenseService _expenseService = ExpenseService();
   String? _selectedCategory;
   DateTime _selectedDate = DateTime.now();
@@ -50,9 +51,9 @@ class _AddExpenseState extends State<AddExpense> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
-      if (picked != null) {
+    if (picked != null) {
       setState(() {
-        _selectedDate = picked!; // ✅ Dart now knows it's non-null
+        _selectedDate = picked;
         _dateController.text = _formatDate(picked);
       });
     }
@@ -60,8 +61,18 @@ class _AddExpenseState extends State<AddExpense> {
 
   String _formatDate(DateTime date) {
     final months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return '${months[date.month - 1]} ${date.day.toString().padLeft(2, '0')}, ${date.year}';
   }
@@ -90,11 +101,26 @@ class _AddExpenseState extends State<AddExpense> {
       amount: amount,
       category: _selectedCategory!,
       date: _selectedDate,
-      message: _messageController.text.isNotEmpty ? _messageController.text : null,
+      message:
+          _messageController.text.isNotEmpty ? _messageController.text : null,
     );
 
     await _expenseService.addExpense(expense);
-    
+
+    // Update AuthService user totals
+    final authService = AuthService();
+    if (authService.currentUser != null) {
+      final user = authService.currentUser!;
+      final newTotalExpense = user.totalExpense + amount;
+      final newTotalBalance = user.totalBalance - amount;
+      authService.setCurrentUser(
+        user.copyWith(
+          totalExpense: newTotalExpense,
+          totalBalance: newTotalBalance,
+        ),
+      );
+    }
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Expense added successfully!')),
@@ -207,14 +233,18 @@ class _AddExpenseState extends State<AddExpense> {
                         value: _selectedCategory,
                         decoration: const InputDecoration(
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                         ),
-                        items: _expenseService.categories.map((category) {
-                          return DropdownMenuItem(
-                            value: category,
-                            child: Text(category),
-                          );
-                        }).toList(),
+                        items:
+                            _expenseService.categories.map((category) {
+                              return DropdownMenuItem(
+                                value: category,
+                                child: Text(category),
+                              );
+                            }).toList(),
                         onChanged: (value) {
                           setState(() {
                             _selectedCategory = value;
@@ -237,12 +267,16 @@ class _AddExpenseState extends State<AddExpense> {
                     const SizedBox(height: 8),
                     TextField(
                       controller: _amountController,
-                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,2}'),
+                        ),
                       ],
                       decoration: InputDecoration(
-                        prefixText: '\$',
+                        prefixText: '₱',
                         filled: true,
                         fillColor: fieldGreen,
                         border: OutlineInputBorder(
@@ -331,4 +365,4 @@ class _AddExpenseState extends State<AddExpense> {
       ),
     );
   }
-} 
+}

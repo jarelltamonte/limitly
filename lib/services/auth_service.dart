@@ -15,10 +15,14 @@ class AuthService {
   User? get currentUser => _currentUser;
   bool get isLoggedIn => _isLoggedIn;
 
+  void setCurrentUser(User user) {
+    _currentUser = user;
+  }
+
   Future<bool> login(String email, String password) async {
     // Simulate API call delay
     await Future.delayed(const Duration(milliseconds: 1000));
-    
+
     // Check demo credentials
     if (email == _demoEmail && password == _demoPassword) {
       _currentUser = User(
@@ -32,7 +36,7 @@ class AuthService {
       _isLoggedIn = true;
       return true;
     }
-    
+
     // For any other email/password combination, also allow login (for demo purposes)
     _currentUser = User(
       id: "2",
@@ -49,7 +53,7 @@ class AuthService {
   Future<bool> signup(String name, String email, String password) async {
     // Simulate API call delay
     await Future.delayed(const Duration(milliseconds: 1000));
-    
+
     _currentUser = User(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: name,
@@ -72,4 +76,4 @@ class AuthService {
     await Future.delayed(const Duration(milliseconds: 1000));
     return true; // Always return true for demo
   }
-} 
+}

@@ -23,9 +23,13 @@ class _SavingsCategoryDetailState extends State<SavingsCategoryDetail> {
     final lightGreen = const Color(0xFFEAF8EF);
     final lightBlue = const Color(0xFFE3F2FD);
     final savings = _savingsService.getSavingsByCategory(widget.category);
-    final totalAmount = _savingsService.getTotalSavingsByCategory(widget.category);
+    final totalAmount = _savingsService.getTotalSavingsByCategory(
+      widget.category,
+    );
     final targetAmount = _savingsService.getTargetAmount(widget.category);
-    final progressPercentage = _savingsService.getProgressPercentage(widget.category);
+    final progressPercentage = _savingsService.getProgressPercentage(
+      widget.category,
+    );
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -42,113 +46,109 @@ class _SavingsCategoryDetailState extends State<SavingsCategoryDetail> {
                 bottomRight: Radius.circular(30),
               ),
             ),
-            child: Stack(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 16),
+                // Back button on top
+                IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                const SizedBox(height: 8),
+                // Header content
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const SizedBox(height: 40),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Total Balance',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '\$${_authService.currentUser?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            const Text(
-                              'Total Savings',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '\$${_savingsService.getTotalSavings().toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    // Progress bar
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '${progressPercentage.toStringAsFixed(0)}%',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                            Text(
-                              'Target: \$${targetAmount.toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                          ],
+                        const Text(
+                          'Total Balance',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        LinearProgressIndicator(
-                          value: progressPercentage / 100,
-                          backgroundColor: Colors.white.withOpacity(0.3),
-                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                          minHeight: 8,
+                        const SizedBox(height: 4),
+                        Text(
+                          '₱${_authService.currentUser?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Text(
+                          'Total Savings',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '₱${_savingsService.getTotalSavings().toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins',
+                          ),
                         ),
                       ],
                     ),
                   ],
                 ),
-                // Back button
-                Positioned(
-                  top: 40,
-                  left: 0,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                      size: 24,
+                const SizedBox(height: 20),
+                // Progress bar
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${progressPercentage.toStringAsFixed(0)}%',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                        Text(
+                          'Target: ₱${targetAmount.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
                     ),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
+                    const SizedBox(height: 8),
+                    LinearProgressIndicator(
+                      value: progressPercentage / 100,
+                      backgroundColor: Colors.white.withOpacity(0.3),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Colors.white,
+                      ),
+                      minHeight: 8,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -200,7 +200,7 @@ class _SavingsCategoryDetailState extends State<SavingsCategoryDetail> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '\$${totalAmount.toStringAsFixed(2)}',
+                          '₱${totalAmount.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -215,24 +215,25 @@ class _SavingsCategoryDetailState extends State<SavingsCategoryDetail> {
 
                   // Savings list
                   Expanded(
-                    child: savings.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'No savings in this category yet',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'Poppins',
-                                color: Colors.grey,
+                    child:
+                        savings.isEmpty
+                            ? const Center(
+                              child: Text(
+                                'No savings in this category yet',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'Poppins',
+                                  color: Colors.grey,
+                                ),
                               ),
+                            )
+                            : ListView.builder(
+                              itemCount: savings.length,
+                              itemBuilder: (context, index) {
+                                final saving = savings[index];
+                                return _buildSavingsItem(saving);
+                              },
                             ),
-                          )
-                        : ListView.builder(
-                            itemCount: savings.length,
-                            itemBuilder: (context, index) {
-                              final saving = savings[index];
-                              return _buildSavingsItem(saving);
-                            },
-                          ),
                   ),
 
                   // Add Savings button
@@ -247,15 +248,23 @@ class _SavingsCategoryDetailState extends State<SavingsCategoryDetail> {
                           borderRadius: BorderRadius.circular(25),
                         ),
                       ),
-                      onPressed: () {
-                        Navigator.push(
+                      onPressed: () async {
+                        // Navigate to AddSavings and wait for result
+                        final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => AddSavings(
-                              selectedCategory: widget.category,
-                            ),
+                            builder:
+                                (context) => AddSavings(
+                                  selectedCategory: widget.category,
+                                ),
                           ),
                         );
+                        // If a new saving was added, refresh UI
+                        if (result != null && result is Savings) {
+                          setState(() {});
+                        } else {
+                          setState(() {}); // Refresh in case of changes
+                        }
                       },
                       child: const Text(
                         'Add Savings',
@@ -335,7 +344,7 @@ class _SavingsCategoryDetailState extends State<SavingsCategoryDetail> {
           ),
           // Amount
           Text(
-            '\$${saving.amount.toStringAsFixed(2)}',
+            '₱${saving.amount.toStringAsFixed(2)}',
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -365,9 +374,19 @@ class _SavingsCategoryDetailState extends State<SavingsCategoryDetail> {
 
   String _formatDate(DateTime date) {
     final months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return '${months[date.month - 1]} ${date.day.toString().padLeft(2, '0')}';
   }
-} 
+}

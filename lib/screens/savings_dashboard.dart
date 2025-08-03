@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/savings_service.dart';
 import '../intro.dart';
-import '../analysis_page.dart';
+// import '../analysis_page.dart'; // File does not exist, comment out or fix path
 import 'savings_category_detail.dart';
 import 'dashboard.dart';
+import 'profile_page.dart';
 
 class SavingsDashboard extends StatefulWidget {
   const SavingsDashboard({super.key});
@@ -22,7 +23,7 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
   Widget build(BuildContext context) {
     final darkGreen = const Color(0xFF006231);
     final lightGreen = const Color(0xFFEAF8EF);
-    final lightBlue = const Color(0xFFE3F2FD);
+    // ...existing code...
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -59,7 +60,7 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '\₱${_authService.currentUser?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
+                          '₱${_authService.currentUser?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -82,7 +83,7 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '\₱${_savingsService.getTotalSavings().toStringAsFixed(2)}',
+                          '₱${_savingsService.getTotalSavings().toStringAsFixed(2)}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -99,34 +100,63 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          '30%',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                        const Text(
-                          'Target: \₱20,000.00',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    LinearProgressIndicator(
-                      value: 0.30,
-                      backgroundColor: Colors.white.withOpacity(0.3),
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                      minHeight: 8,
+                    // Calculate total target for all savings categories
+                    Builder(
+                      builder: (context) {
+                        double totalTarget = 0.0;
+                        for (var category in _savingsService.categories) {
+                          final target = _savingsService.getTargetAmount(
+                            category,
+                          );
+                          totalTarget += target;
+                        }
+                        // Fallback if no per-category target method exists
+                        if (totalTarget == 0.0) {
+                          totalTarget =
+                              _authService.currentUser?.targetAmount ?? 20000.0;
+                        }
+                        final totalSavings = _savingsService.getTotalSavings();
+                        final progress =
+                            (totalTarget == 0.0)
+                                ? 0.0
+                                : (totalSavings / totalTarget).clamp(0.0, 1.0);
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '${(progress * 100).toStringAsFixed(0)}%',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ),
+                                Text(
+                                  'Target: ₱${totalTarget.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            LinearProgressIndicator(
+                              value: progress,
+                              backgroundColor: Colors.white.withOpacity(0.3),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                              minHeight: 8,
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -152,21 +182,23 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   // Categories Grid
                   Expanded(
                     child: GridView.builder(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 1.0,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 1.0,
+                          ),
                       itemCount: _savingsService.categories.length,
                       itemBuilder: (context, index) {
                         final category = _savingsService.categories[index];
-                        final totalAmount = _savingsService.getTotalSavingsByCategory(category);
-                        
+                        final totalAmount = _savingsService
+                            .getTotalSavingsByCategory(category);
+
                         return _buildSavingsCard(
                           icon: _getCategoryIcon(category),
                           title: category,
@@ -175,7 +207,10 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => SavingsCategoryDetail(category: category),
+                                builder:
+                                    (context) => SavingsCategoryDetail(
+                                      category: category,
+                                    ),
                               ),
                             );
                           },
@@ -261,11 +296,7 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 48,
-              color: darkBlue,
-            ),
+            Icon(icon, size: 48, color: darkBlue),
             const SizedBox(height: 12),
             Text(
               title,
@@ -279,7 +310,7 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
             ),
             const SizedBox(height: 8),
             Text(
-              '\₱${amount.toStringAsFixed(2)}',
+              '₱${amount.toStringAsFixed(2)}',
               style: const TextStyle(
                 fontSize: 14,
                 fontFamily: 'Poppins',
@@ -298,9 +329,11 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
 
     return GestureDetector(
       onTap: () {
-        if (index == 5) { // Profile tab
+        if (index == 5) {
+          // Profile tab
           _showProfileOptions(context);
-        } else if (index == 3) { // Categories tab - go back to expenses
+        } else if (index == 3) {
+          // Categories tab - go back to expenses
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const Dashboard()),
@@ -359,87 +392,100 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
   void _showAddCategoryDialog(BuildContext context) {
     final TextEditingController nameController = TextEditingController();
     final TextEditingController targetController = TextEditingController();
-    
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add New Savings Category'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Category Name',
-                border: OutlineInputBorder(),
-              ),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Add New Savings Category'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Category Name',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: targetController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Target Amount',
+                    prefixText: '\₱',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: targetController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Target Amount',
-                prefixText: '\₱',
-                border: OutlineInputBorder(),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+              ElevatedButton(
+                onPressed: () async {
+                  if (nameController.text.isNotEmpty &&
+                      targetController.text.isNotEmpty) {
+                    final targetAmount = double.tryParse(targetController.text);
+                    if (targetAmount != null && targetAmount > 0) {
+                      await _savingsService.addCategory(
+                        nameController.text,
+                        targetAmount,
+                      );
+                      setState(() {});
+                      Navigator.pop(context);
+                    }
+                  }
+                },
+                child: const Text('Add'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () async {
-              if (nameController.text.isNotEmpty && targetController.text.isNotEmpty) {
-                final targetAmount = double.tryParse(targetController.text);
-                if (targetAmount != null && targetAmount > 0) {
-                  await _savingsService.addCategory(nameController.text, targetAmount);
-                  setState(() {});
-                  Navigator.pop(context);
-                }
-              }
-            },
-            child: const Text('Add'),
-          ),
-        ],
-      ),
     );
   }
 
   void _showProfileOptions(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('Profile'),
-              onTap: () {
-                Navigator.pop(context);
-                // TODO: Navigate to profile screen
-              },
+      builder:
+          (context) => Container(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.person),
+                  title: const Text('Profile'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProfilePage(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.logout),
+                  title: const Text('Logout'),
+                  onTap: () {
+                    _authService.logout();
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const IntroPage(),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Logout'),
-              onTap: () {
-                _authService.logout();
-                Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const IntroPage()),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
-} 
+}
