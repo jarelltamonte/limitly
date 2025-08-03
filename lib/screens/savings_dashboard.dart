@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/savings_service.dart';
 import '../intro.dart';
-// import '../analysis_page.dart'; // File does not exist, comment out or fix path
 import 'savings_category_detail.dart';
 import 'dashboard.dart';
 import 'profile_page.dart';
@@ -23,7 +22,7 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
   Widget build(BuildContext context) {
     final darkGreen = const Color(0xFF006231);
     final lightGreen = const Color(0xFFEAF8EF);
-    // ...existing code...
+    final lightBlue = const Color(0xFFE3F2FD);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -96,69 +95,62 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                // Progress bar
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Calculate total target for all savings categories
-                    Builder(
-                      builder: (context) {
-                        double totalTarget = 0.0;
-                        for (var category in _savingsService.categories) {
-                          final target = _savingsService.getTargetAmount(
-                            category,
-                          );
-                          totalTarget += target;
-                        }
-                        // Fallback if no per-category target method exists
-                        if (totalTarget == 0.0) {
-                          totalTarget =
-                              _authService.currentUser?.targetAmount ?? 20000.0;
-                        }
-                        final totalSavings = _savingsService.getTotalSavings();
-                        final progress =
-                            (totalTarget == 0.0)
-                                ? 0.0
-                                : (totalSavings / totalTarget).clamp(0.0, 1.0);
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+
+                // Dynamic Progress Bar
+                Builder(
+                  builder: (context) {
+                    double totalTarget = 0.0;
+                    for (var category in _savingsService.categories) {
+                      final target = _savingsService.getTargetAmount(category);
+                      totalTarget += target;
+                    }
+                    if (totalTarget == 0.0) {
+                      totalTarget =
+                          _authService.currentUser?.targetAmount ?? 20000.0;
+                    }
+                    final totalSavings = _savingsService.getTotalSavings();
+                    final progress =
+                        (totalTarget == 0.0)
+                            ? 0.0
+                            : (totalSavings / totalTarget).clamp(0.0, 1.0);
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  '${(progress * 100).toStringAsFixed(0)}%',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Poppins',
-                                  ),
-                                ),
-                                Text(
-                                  'Target: ₱${totalTarget.toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontFamily: 'Poppins',
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            LinearProgressIndicator(
-                              value: progress,
-                              backgroundColor: Colors.white.withOpacity(0.3),
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                Colors.white,
+                            Text(
+                              '${(progress * 100).toStringAsFixed(0)}%',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
                               ),
-                              minHeight: 8,
+                            ),
+                            Text(
+                              'Target: ₱${totalTarget.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
                             ),
                           ],
-                        );
-                      },
-                    ),
-                  ],
+                        ),
+                        const SizedBox(height: 8),
+                        LinearProgressIndicator(
+                          value: progress,
+                          backgroundColor: Colors.white.withOpacity(0.3),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                          minHeight: 8,
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
@@ -171,7 +163,6 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  // Title
                   const Text(
                     'Savings',
                     style: TextStyle(
@@ -183,7 +174,6 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Categories Grid
                   Expanded(
                     child: GridView.builder(
                       gridDelegate:
@@ -219,7 +209,6 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
                     ),
                   ),
 
-                  // Add More button
                   const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
@@ -330,10 +319,8 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
     return GestureDetector(
       onTap: () {
         if (index == 5) {
-          // Profile tab
           _showProfileOptions(context);
         } else if (index == 3) {
-          // Categories tab - go back to expenses
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const Dashboard()),
@@ -414,7 +401,7 @@ class _SavingsDashboardState extends State<SavingsDashboard> {
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     labelText: 'Target Amount',
-                    prefixText: '\₱',
+                    prefixText: '₱',
                     border: OutlineInputBorder(),
                   ),
                 ),

@@ -1,9 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../models/expense.dart';
 
 class ExpenseService {
   static final ExpenseService _instance = ExpenseService._internal();
   factory ExpenseService() => _instance;
   ExpenseService._internal();
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final List<Expense> _expenses = [
     Expense(
@@ -55,7 +59,7 @@ class ExpenseService {
   ];
 
   List<Expense> get expenses => List.unmodifiable(_expenses);
-  
+
   List<String> get categories => List.unmodifiable(_categories);
 
   List<Expense> getExpensesByCategory(String category) {
@@ -72,23 +76,42 @@ class ExpenseService {
     return _expenses.fold(0.0, (sum, expense) => sum + expense.amount);
   }
 
+  Future<void> loadExpenses() async {
+    final snapshot = await _firestore.collection('expenses').get();
+    _expenses.clear();
+    for (var doc in snapshot.docs) {
+      _expenses.add(Expense.fromJson(doc.data()));
+    }
+  }
+
+  Future<void> loadCategories() async {
+    final snapshot = await _firestore.collection('expense_categories').get();
+    _categories.clear();
+    for (var doc in snapshot.docs) {
+      _categories.add(doc['name']);
+    }
+  }
+
   Future<void> addExpense(Expense expense) async {
-    // Simulate API call delay
-    await Future.delayed(const Duration(milliseconds: 500));
+    await _firestore.collection('expenses').doc(expense.id).set(expense.toJson());
     _expenses.add(expense);
   }
 
   Future<void> deleteExpense(String id) async {
-    // Simulate API call delay
-    await Future.delayed(const Duration(milliseconds: 500));
+    await _firestore.collection('expenses').doc(id).delete();
     _expenses.removeWhere((expense) => expense.id == id);
   }
 
   Future<void> addCategory(String category) async {
-    // Simulate API call delay
-    await Future.delayed(const Duration(milliseconds: 500));
     if (!_categories.contains(category)) {
+      await _firestore.collection('expense_categories').add({'name': category});
       _categories.add(category);
     }
   }
-} 
+
+  // Call these on app start to load data
+  Future<void> initialize() async {
+    await loadCategories();
+    await loadExpenses();
+  }
+}

@@ -32,16 +32,16 @@ class _ForgotPageState extends State<ForgotPage> {
     if (_emailController.text.isEmpty ||
         _passwordController.text.isEmpty ||
         _confirmPasswordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please fill all fields.')));
       return;
     }
 
     if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Passwords do not match.')));
       return;
     }
 
@@ -57,7 +57,9 @@ class _ForgotPageState extends State<ForgotPage> {
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password has been reset successfully!')),
+          const SnackBar(
+            content: Text('Password has been reset successfully!'),
+          ),
         );
         // Navigate back to the login page after a short delay
         Future.delayed(const Duration(seconds: 2), () {
@@ -67,14 +69,16 @@ class _ForgotPageState extends State<ForgotPage> {
         });
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password reset failed. Please try again.')),
+          const SnackBar(
+            content: Text('Password reset failed. Please try again.'),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) {
@@ -182,23 +186,24 @@ class _ForgotPageState extends State<ForgotPage> {
                           ),
                         ),
                         onPressed: _isLoading ? null : _resetPassword,
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
+                        child:
+                            _isLoading
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                                : const Text(
+                                  'Reset Password',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                    fontFamily: 'Poppins',
+                                  ),
                                 ),
-                              )
-                            : const Text(
-                                'Reset Password',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Poppins',
-                                ),
-                              ),
                       ),
                     ),
                   ],
@@ -212,49 +217,58 @@ class _ForgotPageState extends State<ForgotPage> {
   }
 
   Widget buildLabel(String label) => Padding(
-        padding: const EdgeInsets.only(bottom: 8.0, top: 16.0),
-        child: Text(label,
-            style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                fontFamily: 'Poppins')),
-      );
+    padding: const EdgeInsets.only(bottom: 8.0, top: 16.0),
+    child: Text(
+      label,
+      style: const TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 16,
+        fontFamily: 'Poppins',
+      ),
+    ),
+  );
 
-  Widget buildTextField(
-          {required TextEditingController controller,
-          required String hintText,
-          required Color fieldGreen,
-          TextInputType? keyboardType}) =>
-      TextField(
-          controller: controller,
-          keyboardType: keyboardType,
-          decoration: InputDecoration(
-              hintText: hintText,
-              hintStyle: const TextStyle(fontSize: 14, color: Colors.grey),
-              filled: true,
-              fillColor: fieldGreen,
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none)));
+  Widget buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required Color fieldGreen,
+    TextInputType? keyboardType,
+  }) => TextField(
+    controller: controller,
+    keyboardType: keyboardType,
+    decoration: InputDecoration(
+      hintText: hintText,
+      hintStyle: const TextStyle(fontSize: 14, color: Colors.grey),
+      filled: true,
+      fillColor: fieldGreen,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: BorderSide.none,
+      ),
+    ),
+  );
 
-  Widget buildPasswordField(
-          {required TextEditingController controller,
-          required bool obscureText,
-          required VoidCallback toggle,
-          required Color fieldGreen}) =>
-      TextField(
-          controller: controller,
-          obscureText: obscureText,
-          decoration: InputDecoration(
-              hintText: '••••••••',
-              hintStyle: const TextStyle(fontSize: 14, color: Colors.grey),
-              filled: true,
-              fillColor: fieldGreen,
-              suffixIcon: IconButton(
-                  icon: Icon(
-                      obscureText ? Icons.visibility_off : Icons.visibility),
-                  onPressed: toggle),
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none)));
+  Widget buildPasswordField({
+    required TextEditingController controller,
+    required bool obscureText,
+    required VoidCallback toggle,
+    required Color fieldGreen,
+  }) => TextField(
+    controller: controller,
+    obscureText: obscureText,
+    decoration: InputDecoration(
+      hintText: '••••••••',
+      hintStyle: const TextStyle(fontSize: 14, color: Colors.grey),
+      filled: true,
+      fillColor: fieldGreen,
+      suffixIcon: IconButton(
+        icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility),
+        onPressed: toggle,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: BorderSide.none,
+      ),
+    ),
+  );
 }

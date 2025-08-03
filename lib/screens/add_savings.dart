@@ -19,7 +19,7 @@ class _AddSavingsState extends State<AddSavings> {
   final _amountController = TextEditingController();
   final _titleController = TextEditingController();
   final _messageController = TextEditingController();
-
+  
   final SavingsService _savingsService = SavingsService();
   String? _selectedCategory;
   DateTime _selectedDate = DateTime.now();
@@ -30,7 +30,7 @@ class _AddSavingsState extends State<AddSavings> {
     _selectedCategory = widget.selectedCategory;
     _dateController.text = _formatDate(_selectedDate);
     _categoryController.text = _selectedCategory ?? '';
-
+    
     // Pre-fill based on category
     if (_selectedCategory != null) {
       switch (_selectedCategory!.toLowerCase()) {
@@ -77,28 +77,18 @@ class _AddSavingsState extends State<AddSavings> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked; // ✅ Assert non-null
+    setState(() {
+      if (picked != null) {
+        _selectedDate = picked;
         _dateController.text = _formatDate(picked);
-      });
+      }
+    });
     }
-  }
 
   String _formatDate(DateTime date) {
     final months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
     ];
     return '${months[date.month - 1]} ${date.day.toString().padLeft(2, '0')}, ${date.year}';
   }
@@ -127,26 +117,24 @@ class _AddSavingsState extends State<AddSavings> {
       amount: amount,
       category: _selectedCategory!,
       date: _selectedDate,
-      message:
-          _messageController.text.isNotEmpty ? _messageController.text : null,
+      message: _messageController.text.isNotEmpty ? _messageController.text : null,
       targetAmount: _savingsService.getTargetAmount(_selectedCategory!),
     );
 
     await _savingsService.addSavings(saving);
 
-    // Update AuthService user totalBalance (decrease by amount)
     final authService = AuthService();
     if (authService.currentUser != null) {
       final user = authService.currentUser!;
       final newTotalBalance = user.totalBalance - amount;
       authService.setCurrentUser(user.copyWith(totalBalance: newTotalBalance));
     }
-
+    
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Savings added successfully!')),
       );
-      Navigator.pop(context, saving); // Pass the new saving back
+      Navigator.pop(context, saving);
     }
   }
 
@@ -254,18 +242,14 @@ class _AddSavingsState extends State<AddSavings> {
                         value: _selectedCategory,
                         decoration: const InputDecoration(
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         ),
-                        items:
-                            _savingsService.categories.map((category) {
-                              return DropdownMenuItem(
-                                value: category,
-                                child: Text(category),
-                              );
-                            }).toList(),
+                        items: _savingsService.categories.map((category) {
+                          return DropdownMenuItem(
+                            value: category,
+                            child: Text(category),
+                          );
+                        }).toList(),
                         onChanged: (value) {
                           setState(() {
                             _selectedCategory = value;
@@ -307,16 +291,12 @@ class _AddSavingsState extends State<AddSavings> {
                     const SizedBox(height: 8),
                     TextField(
                       controller: _amountController,
-                      keyboardType: TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
+                      keyboardType: TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d+\.?\d{0,2}'),
-                        ),
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                       ],
                       decoration: InputDecoration(
-                        prefixText: '₱',
+                        prefixText: '\₱',
                         filled: true,
                         fillColor: fieldGreen,
                         border: OutlineInputBorder(
@@ -405,4 +385,4 @@ class _AddSavingsState extends State<AddSavings> {
       ),
     );
   }
-}
+} 
