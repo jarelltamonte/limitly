@@ -36,4 +36,4 @@ class Expense {
       message: json['message'],
     );
   }
-} 
+}

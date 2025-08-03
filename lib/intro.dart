@@ -82,7 +82,10 @@ class IntroPage extends StatelessWidget {
                         height: 48,
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Color(0xFF006231), width: 2),
+                            side: const BorderSide(
+                              color: Color(0xFF006231),
+                              width: 2,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(24),
                             ),

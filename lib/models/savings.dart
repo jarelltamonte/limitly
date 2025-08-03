@@ -40,4 +40,4 @@ class Savings {
       targetAmount: json['targetAmount'].toDouble(),
     );
   }
-} 
+}

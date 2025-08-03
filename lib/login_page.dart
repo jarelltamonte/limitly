@@ -28,9 +28,9 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _handleLogin() async {
     if (_usernameController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please fill all fields')));
       return;
     }
 
@@ -56,9 +56,9 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) {
@@ -73,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final darkGreen = const Color(0xFF006231);
     final lightGreen = const Color(0xFFEAF8EF);
-    final fieldGreen = const Color(0xFFDEF8E1); 
+    final fieldGreen = const Color(0xFFDEF8E1);
 
     return Scaffold(
       backgroundColor: darkGreen,
@@ -114,14 +114,21 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     const Text(
                       'Username Or Email',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Poppins', fontSize: 16),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _usernameController,
                       decoration: InputDecoration(
                         hintText: 'example@example.com',
-                        hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+                        hintStyle: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                        ),
                         filled: true,
                         fillColor: fieldGreen,
                         border: OutlineInputBorder(
@@ -133,7 +140,11 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 16),
                     const Text(
                       'Password',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Poppins', fontSize: 16),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     TextField(
@@ -141,7 +152,10 @@ class _LoginPageState extends State<LoginPage> {
                       obscureText: !_showPassword,
                       decoration: InputDecoration(
                         hintText: '••••••••',
-                        hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+                        hintStyle: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                        ),
                         filled: true,
                         fillColor: fieldGreen,
                         border: OutlineInputBorder(
@@ -174,23 +188,24 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         onPressed: _isLoading ? null : _handleLogin,
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
+                        child:
+                            _isLoading
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                                : const Text(
+                                  'Log In',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                    fontFamily: 'Poppins',
+                                  ),
                                 ),
-                              )
-                            : const Text(
-                                'Log In',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Poppins',
-                                ),
-                              ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -199,7 +214,10 @@ class _LoginPageState extends State<LoginPage> {
                         children: [
                           RichText(
                             text: TextSpan(
-                              style: const TextStyle(color: Colors.black, fontFamily: 'Poppins'),
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Poppins',
+                              ),
                               children: [
                                 const TextSpan(
                                   text: "Don't have an account? ",
@@ -213,15 +231,18 @@ class _LoginPageState extends State<LoginPage> {
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'Poppins',
                                   ),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const SignupPage()),
-                                      );
-                                    },
+                                  recognizer:
+                                      TapGestureRecognizer()
+                                        ..onTap = () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder:
+                                                  (context) =>
+                                                      const SignupPage(),
+                                            ),
+                                          );
+                                        },
                                 ),
                               ],
                             ),
@@ -320,14 +341,17 @@ class _LoginPageState extends State<LoginPage> {
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Poppins',
                               ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => const ForgotPage()),
-                                  );
-                                },
+                              recognizer:
+                                  TapGestureRecognizer()
+                                    ..onTap = () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) => const ForgotPage(),
+                                        ),
+                                      );
+                                    },
                             ),
                           ),
                         ],

@@ -93,7 +93,10 @@ class ExpenseService {
   }
 
   Future<void> addExpense(Expense expense) async {
-    await _firestore.collection('expenses').doc(expense.id).set(expense.toJson());
+    await _firestore
+        .collection('expenses')
+        .doc(expense.id)
+        .set(expense.toJson());
     _expenses.add(expense);
   }
 

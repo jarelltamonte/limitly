@@ -35,7 +35,7 @@ class SavingsService {
       date: DateTime(2024, 4, 2, 13, 20),
       targetAmount: 20000.0,
     ),
-    
+
     // House savings
     Savings(
       id: "4",
@@ -61,7 +61,7 @@ class SavingsService {
       date: DateTime(2024, 1, 10, 19, 0),
       targetAmount: 500250.0,
     ),
-    
+
     // Car savings
     Savings(
       id: "7",
@@ -87,7 +87,7 @@ class SavingsService {
       date: DateTime(2024, 5, 9, 10, 0),
       targetAmount: 54190.0,
     ),
-    
+
     // Wedding savings
     Savings(
       id: "10",
@@ -115,12 +115,7 @@ class SavingsService {
     ),
   ];
 
-  final List<String> _categories = [
-    "Travel",
-    "House",
-    "Car",
-    "Wedding",
-  ];
+  final List<String> _categories = ["Travel", "House", "Car", "Wedding"];
 
   final Map<String, double> _targetAmounts = {
     "Travel": 20000.0,
@@ -130,7 +125,7 @@ class SavingsService {
   };
 
   List<Savings> get savings => List.unmodifiable(_savings);
-  
+
   List<String> get categories => List.unmodifiable(_categories);
 
   List<Savings> getSavingsByCategory(String category) {
@@ -188,7 +183,10 @@ class SavingsService {
 
   Future<void> addCategory(String category, double targetAmount) async {
     if (!_categories.contains(category)) {
-      await _firestore.collection('savings_categories').add({'name': category, 'targetAmount': targetAmount});
+      await _firestore.collection('savings_categories').add({
+        'name': category,
+        'targetAmount': targetAmount,
+      });
       _categories.add(category);
       _targetAmounts[category] = targetAmount;
     }

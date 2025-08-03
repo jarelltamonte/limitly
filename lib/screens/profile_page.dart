@@ -194,21 +194,24 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         _buildStatCard(
                           title: 'Total Balance',
-                          value: '₱${user?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
+                          value:
+                              '₱${user?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
                           icon: Icons.account_balance_wallet,
                           color: darkGreen,
                         ),
                         const SizedBox(height: 12),
                         _buildStatCard(
                           title: 'Total Expenses',
-                          value: '₱${user?.totalExpense.toStringAsFixed(2) ?? '0.00'}',
+                          value:
+                              '₱${user?.totalExpense.toStringAsFixed(2) ?? '0.00'}',
                           icon: Icons.trending_down,
                           color: Colors.red,
                         ),
                         const SizedBox(height: 12),
                         _buildStatCard(
                           title: 'Progress to Goal',
-                          value: '${user?.progressPercentage.toStringAsFixed(1) ?? '0.0'}%',
+                          value:
+                              '${user?.progressPercentage.toStringAsFixed(1) ?? '0.0'}%',
                           icon: Icons.trending_up,
                           color: Colors.orange,
                         ),
@@ -301,11 +304,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: const Color(0xFF006231),
-            size: 24,
-          ),
+          Icon(icon, color: const Color(0xFF006231), size: 24),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -324,9 +323,10 @@ class _ProfilePageState extends State<ProfilePage> {
                   TextField(
                     controller: controller,
                     enabled: isEditing,
-                    keyboardType: isEmail
-                        ? TextInputType.emailAddress
-                        : isCurrency
+                    keyboardType:
+                        isEmail
+                            ? TextInputType.emailAddress
+                            : isCurrency
                             ? TextInputType.number
                             : TextInputType.text,
                     style: const TextStyle(
@@ -383,11 +383,7 @@ class _ProfilePageState extends State<ProfilePage> {
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 24,
-            ),
+            child: Icon(icon, color: color, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -481,11 +477,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ],
               ),
             ),
-            const Icon(
-              Icons.arrow_forward_ios,
-              color: Colors.grey,
-              size: 16,
-            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
           ],
         ),
       ),
@@ -498,10 +490,11 @@ class _ProfilePageState extends State<ProfilePage> {
       final updatedUser = user.copyWith(
         name: _nameController.text,
         email: _emailController.text,
-        targetAmount: double.tryParse(_targetAmountController.text) ?? user.targetAmount,
+        targetAmount:
+            double.tryParse(_targetAmountController.text) ?? user.targetAmount,
       );
       _authService.setCurrentUser(updatedUser);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Profile updated successfully!'),
@@ -514,48 +507,51 @@ class _ProfilePageState extends State<ProfilePage> {
   void _showChangePasswordDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Change Password'),
-        content: const Text('This feature will be available soon!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Change Password'),
+            content: const Text('This feature will be available soon!'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showExportDataDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Export Data'),
-        content: const Text('This feature will be available soon!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Export Data'),
+            content: const Text('This feature will be available soon!'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showPrivacySettingsDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Privacy Settings'),
-        content: const Text('This feature will be available soon!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Privacy Settings'),
+            content: const Text('This feature will be available soon!'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
-} 
+}
