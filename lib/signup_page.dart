@@ -96,10 +96,11 @@ class _SignupPageState extends State<SignupPage> {
     );
     if (picked != null) {
       setState(() {
-        _birthdayController.text = "${picked.toLocal()}".split(' ')[0];
+        _birthdayController.text = "${picked?.toLocal()}".split(' ')[0];
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

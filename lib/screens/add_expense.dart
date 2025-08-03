@@ -50,13 +50,13 @@ class _AddExpenseState extends State<AddExpense> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
-    if (picked != null) {
-      setState(() {
+    setState(() {
+      if (picked != null) {
         _selectedDate = picked;
         _dateController.text = _formatDate(picked);
-      });
+      }
+    });
     }
-  }
 
   String _formatDate(DateTime date) {
     final months = [

@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:limitly_development/intro.dart';
@@ -6,6 +5,11 @@ import 'package:limitly_development/services/auth_service.dart';
 import 'package:limitly_development/screens/dashboard.dart';
 import 'package:limitly_development/services/expense_service.dart';
 import 'package:limitly_development/services/savings_service.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,6 +70,16 @@ class _AuthWrapperState extends State<AuthWrapper> {
         ExpenseService().initialize().timeout(const Duration(seconds: 10)),
         SavingsService().initialize().timeout(const Duration(seconds: 10)),
       ]);
+
+      try {
+        final snapshot = await FirebaseFirestore.instance.collection('users').get();
+        for (var doc in snapshot.docs) {
+          debugPrint('User doc: ${doc.id} => ${doc.data()}');
+        }
+      } catch (e) {
+        debugPrint('Firestore test failed: $e');
+      }
+
       setState(() {
         _initialized = true;
       });
