@@ -1,15 +1,26 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../services/expense_service.dart';
+import '../services/savings_service.dart';
 
-class AnalysisPage extends StatelessWidget {
+class AnalysisPage extends StatefulWidget {
   const AnalysisPage({super.key});
 
+  @override
+  State<AnalysisPage> createState() => _AnalysisPageState();
+}
+
+class _AnalysisPageState extends State<AnalysisPage> {
   // Colors from the design
   static const Color darkGreen = Color(0xFF006231);
   static const Color fieldGreen = Color(0xFFDEF8E1);
   static const Color expenseColor = Color(0xFFFFD900);
   static const Color goalColor = Colors.white70;
+
+  final ExpenseService _expenseService = ExpenseService();
+  final SavingsService _savingsService = SavingsService();
+  final AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +38,7 @@ class AnalysisPage extends StatelessWidget {
         ),
         backgroundColor: darkGreen,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        automaticallyImplyLeading: false,
         toolbarHeight: 100,
       ),
       body: Column(
@@ -42,63 +53,123 @@ class AnalysisPage extends StatelessWidget {
   }
 
   Widget _buildUpperSection() {
-    const double goalBudget = 30000.00;
-    final double totalExpenses = AuthService().currentUser?.totalExpense ?? 0.0;
-    final bool isOverBudget = totalExpenses > goalBudget;
+    final double targetBudget = _authService.currentUser?.targetAmount ?? 30000.00;
+    final double totalExpenses = _expenseService.getTotalExpenses();
+    final double totalSavings = _savingsService.getTotalSavings();
+    final bool isOverBudget = totalExpenses > targetBudget;
     final Color currentExpenseColor =
         isOverBudget ? Colors.redAccent : expenseColor;
 
     return Container(
       color: darkGreen,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: [
-          // Goal Budget
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Goal Budget',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 16,
-                  fontFamily: 'Poppins',
-                ),
+              // Goal Budget
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Goal Budget',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '₱${targetBudget.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(height: 4),
-              Text(
-                '₱${goalBudget.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Poppins',
-                ),
+              // Total Expenses
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Total Expenses',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '₱${totalExpenses.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      color: currentExpenseColor,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          // Total Expenses
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          const SizedBox(height: 20),
+          // Additional Statistics
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Total Expenses',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 16,
-                  fontFamily: 'Poppins',
-                ),
+              // Total Savings
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Total Savings',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '₱${totalSavings.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(height: 4),
-              Text(
-                '₱${totalExpenses.toStringAsFixed(2)}',
-                style: TextStyle(
-                  color: currentExpenseColor,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Poppins',
-                ),
+              // Progress Percentage
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Budget Used',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '${((totalExpenses / targetBudget) * 100).toStringAsFixed(1)}%',
+                    style: TextStyle(
+                      color: currentExpenseColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -123,7 +194,7 @@ class AnalysisPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Monthly Comparison',
+                'Category Breakdown',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -132,7 +203,19 @@ class AnalysisPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              Expanded(child: BarChart(_buildBarChartData())),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      // Expense Categories Chart
+                      _buildExpenseCategoriesChart(),
+                      const SizedBox(height: 30),
+                      // Savings Progress Chart
+                      _buildSavingsProgressChart(),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -140,121 +223,229 @@ class AnalysisPage extends StatelessWidget {
     );
   }
 
-  BarChartData _buildBarChartData() {
-    // Placeholder data
-    final List<double> monthlyExpenses = [8000, 9500, 8200.50, 6800];
-    const double weeklyGoal = 7500; // 30000 / 4
+  Widget _buildExpenseCategoriesChart() {
+    final categories = _expenseService.categories;
+    final categoryData = categories.map((category) {
+      final total = _expenseService.getTotalExpenseByCategory(category);
+      return {'category': category, 'amount': total};
+    }).where((data) => (data['amount'] as double) > 0).toList();
 
-    return BarChartData(
-      alignment: BarChartAlignment.spaceAround,
-      maxY: 10000, // A bit higher than the max possible weekly value
-      barTouchData: BarTouchData(
-        enabled: true,
-        touchTooltipData: BarTouchTooltipData(
-          // tooltipBgColor: Colors.blueGrey,
-          getTooltipItem: (group, groupIndex, rod, rodIndex) {
-            String weekLabel = _getWeekLabel(group.x.toInt());
-            String type = rodIndex == 0 ? 'Goal' : 'Expense';
-            return BarTooltipItem(
-              '$weekLabel\n',
-              const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-              children: <TextSpan>[
-                TextSpan(
-                  text: '$type: ₱${rod.toY.toStringAsFixed(2)}',
+    if (categoryData.isEmpty) {
+      return Container(
+        height: 200,
+        child: Center(
+          child: Text(
+            'No expense data available',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 16,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Expense Categories',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Poppins',
+            color: darkGreen,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          height: 200,
+          child: PieChart(
+            PieChartData(
+              sections: categoryData.map((data) {
+                final category = data['category'] as String;
+                final amount = data['amount'] as double;
+                final total = _expenseService.getTotalExpenses();
+                final percentage = total > 0 ? (amount / total) : 0.0;
+                
+                return PieChartSectionData(
+                  color: _getCategoryColor(category),
+                  value: amount,
+                  title: '${percentage.toStringAsFixed(1)}%',
+                  radius: 60,
+                  titleStyle: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                );
+              }).toList(),
+              centerSpaceRadius: 40,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Legend
+        Wrap(
+          spacing: 16,
+          runSpacing: 8,
+          children: categoryData.map((data) {
+            final category = data['category'] as String;
+            final amount = data['amount'] as double;
+            
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: _getCategoryColor(category),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '$category: ₱${amount.toStringAsFixed(2)}',
                   style: TextStyle(
-                    color: rod.color,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                    fontFamily: 'Poppins',
+                    color: darkGreen,
                   ),
                 ),
               ],
             );
-          },
+          }).toList(),
         ),
-      ),
-      titlesData: FlTitlesData(
-        show: true,
-        bottomTitles: AxisTitles(
-          sideTitles: SideTitles(
-            showTitles: true,
-            getTitlesWidget: (double value, TitleMeta meta) {
-              return SideTitleWidget(
-                axisSide: meta.axisSide,
-                space: 8.0,
-                child: Text(
-                  _getWeekLabel(value.toInt()),
-                  style: const TextStyle(
-                    color: darkGreen,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              );
-            },
-            reservedSize: 38,
-          ),
-        ),
-        leftTitles: AxisTitles(
-          sideTitles: SideTitles(
-            showTitles: true,
-            reservedSize: 40,
-            getTitlesWidget: (value, meta) {
-              if (value % 2500 == 0 && value > 0) {
-                return Text(
-                  '${(value / 1000).toStringAsFixed(0)}k',
-                  style: const TextStyle(color: darkGreen, fontSize: 12),
-                );
-              }
-              return const Text('');
-            },
-          ),
-        ),
-        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        rightTitles: const AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
-      ),
-      borderData: FlBorderData(show: false),
-      barGroups: List.generate(4, (i) {
-        return BarChartGroupData(
-          x: i,
-          barRods: [
-            BarChartRodData(
-              toY: weeklyGoal,
-              color: goalColor.withOpacity(0.5),
-              width: 22,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            BarChartRodData(
-              toY: monthlyExpenses[i],
-              color: expenseColor,
-              width: 22,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ],
-          showingTooltipIndicators: [],
-        );
-      }),
-      gridData: const FlGridData(show: false),
+      ],
     );
   }
 
-  String _getWeekLabel(int value) {
-    switch (value) {
-      case 0:
-        return 'Week 1';
-      case 1:
-        return 'Week 2';
-      case 2:
-        return 'Week 3';
-      case 3:
-        return 'Week 4';
+  Widget _buildSavingsProgressChart() {
+    final categories = _savingsService.categories;
+    final categoryData = categories.map((category) {
+      final saved = _savingsService.getTotalSavingsByCategory(category);
+      final target = _savingsService.getTargetAmount(category);
+      final progress = target > 0 ? (saved / target) * 100 : 0.0;
+      
+      return {
+        'category': category,
+        'saved': saved,
+        'target': target,
+        'progress': progress,
+      };
+    }).where((data) => (data['target'] as double) > 0).toList();
+
+    if (categoryData.isEmpty) {
+      return Container(
+        height: 200,
+        child: Center(
+          child: Text(
+            'No savings data available',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 16,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Savings Progress',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Poppins',
+            color: darkGreen,
+          ),
+        ),
+        const SizedBox(height: 16),
+        ...categoryData.map((data) {
+          final category = data['category'] as String;
+          final saved = data['saved'] as double;
+          final target = data['target'] as double;
+          final progress = data['progress'] as double;
+          
+          return Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      category,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Poppins',
+                        color: darkGreen,
+                      ),
+                    ),
+                    Text(
+                      '${progress.toStringAsFixed(1)}%',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Poppins',
+                        color: darkGreen,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                LinearProgressIndicator(
+                  value: progress / 100,
+                  backgroundColor: Colors.grey[300],
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    progress >= 100 ? Colors.green : darkGreen,
+                  ),
+                  minHeight: 8,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '₱${saved.toStringAsFixed(2)} / ₱${target.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontFamily: 'Poppins',
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ],
+    );
+  }
+
+  Color _getCategoryColor(String category) {
+    switch (category.toLowerCase()) {
+      case 'food':
+        return Colors.orange;
+      case 'transport':
+        return Colors.blue;
+      case 'health':
+        return Colors.red;
+      case 'shopping':
+        return Colors.purple;
+      case 'rent':
+        return Colors.brown;
+      case 'gift':
+        return Colors.pink;
+      case 'savings':
+        return Colors.green;
+      case 'entertainment':
+        return Colors.indigo;
       default:
-        return '';
+        return Colors.grey;
     }
   }
 }

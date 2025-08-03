@@ -30,8 +30,9 @@ class _AddExpenseState extends State<AddExpense> {
     _selectedCategory = widget.selectedCategory;
     _dateController.text = _formatDate(_selectedDate);
     _categoryController.text = _selectedCategory ?? '';
-    _amountController.text = '26.00';
-    _titleController.text = 'Dinner';
+    _amountController.text = '';
+    _titleController.text = '';
+    _messageController.text = '';
   }
 
   @override
@@ -257,7 +258,7 @@ class _AddExpenseState extends State<AddExpense> {
                         FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                       ],
                       decoration: InputDecoration(
-                        prefixText: '\$',
+                        prefixText: '₱',
                         filled: true,
                         fillColor: fieldGreen,
                         border: OutlineInputBorder(

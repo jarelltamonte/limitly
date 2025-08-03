@@ -5,6 +5,8 @@ class User {
   final double totalBalance;
   final double totalExpense;
   final double targetAmount;
+  final double monthlySalary;
+  final double totalIncome;
 
   User({
     required this.id,
@@ -13,11 +15,18 @@ class User {
     this.totalBalance = 0.0,
     this.totalExpense = 0.0,
     this.targetAmount = 20000.0,
+    this.monthlySalary = 0.0,
+    this.totalIncome = 0.0,
   });
 
   double get progressPercentage {
     if (targetAmount == 0) return 0.0;
     return (totalExpense / targetAmount) * 100;
+  }
+
+  double get savingsRate {
+    if (totalIncome == 0) return 0.0;
+    return ((totalBalance + totalExpense) / totalIncome) * 100;
   }
 
   Map<String, dynamic> toJson() {
@@ -28,6 +37,8 @@ class User {
       'totalBalance': totalBalance,
       'totalExpense': totalExpense,
       'targetAmount': targetAmount,
+      'monthlySalary': monthlySalary,
+      'totalIncome': totalIncome,
     };
   }
 
@@ -39,6 +50,8 @@ class User {
       totalBalance: json['totalBalance']?.toDouble() ?? 0.0,
       totalExpense: json['totalExpense']?.toDouble() ?? 0.0,
       targetAmount: json['targetAmount']?.toDouble() ?? 20000.0,
+      monthlySalary: json['monthlySalary']?.toDouble() ?? 0.0,
+      totalIncome: json['totalIncome']?.toDouble() ?? 0.0,
     );
   }
   User copyWith({
@@ -48,6 +61,8 @@ class User {
     double? totalBalance,
     double? totalExpense,
     double? targetAmount,
+    double? monthlySalary,
+    double? totalIncome,
   }) {
     return User(
       id: id ?? this.id,
@@ -56,6 +71,8 @@ class User {
       totalBalance: totalBalance ?? this.totalBalance,
       totalExpense: totalExpense ?? this.totalExpense,
       targetAmount: targetAmount ?? this.targetAmount,
+      monthlySalary: monthlySalary ?? this.monthlySalary,
+      totalIncome: totalIncome ?? this.totalIncome,
     );
   }
 }

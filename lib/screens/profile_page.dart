@@ -14,6 +14,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _targetAmountController = TextEditingController();
+  final TextEditingController _salaryController = TextEditingController();
   bool _isEditing = false;
 
   @override
@@ -28,6 +29,7 @@ class _ProfilePageState extends State<ProfilePage> {
       _nameController.text = user.name;
       _emailController.text = user.email;
       _targetAmountController.text = user.targetAmount.toStringAsFixed(2);
+      _salaryController.text = user.monthlySalary.toStringAsFixed(2);
     }
   }
 
@@ -36,6 +38,7 @@ class _ProfilePageState extends State<ProfilePage> {
     _nameController.dispose();
     _emailController.dispose();
     _targetAmountController.dispose();
+    _salaryController.dispose();
     super.dispose();
   }
 
@@ -179,6 +182,14 @@ class _ProfilePageState extends State<ProfilePage> {
                     _buildProfileSection(
                       title: 'Financial Goals',
                       children: [
+                        _buildProfileField(
+                          label: 'Monthly Salary',
+                          controller: _salaryController,
+                          isEditing: _isEditing,
+                          icon: Icons.work,
+                          isCurrency: true,
+                        ),
+                        const SizedBox(height: 16),
                         _buildProfileField(
                           label: 'Target Savings Amount',
                           controller: _targetAmountController,
@@ -484,16 +495,14 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _saveProfile() {
+  void _saveProfile() async {
     final user = _authService.currentUser;
     if (user != null) {
-      final updatedUser = user.copyWith(
-        name: _nameController.text,
-        email: _emailController.text,
-        targetAmount:
-            double.tryParse(_targetAmountController.text) ?? user.targetAmount,
-      );
-      _authService.setCurrentUser(updatedUser);
+      final name = _nameController.text;
+      final targetAmount = double.tryParse(_targetAmountController.text) ?? user.targetAmount;
+      final monthlySalary = double.tryParse(_salaryController.text) ?? user.monthlySalary;
+      
+      await _authService.updateUserProfile(name, targetAmount, monthlySalary);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

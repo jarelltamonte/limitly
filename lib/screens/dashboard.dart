@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import '../services/auth_service.dart';
 import '../services/expense_service.dart';
 import '../services/savings_service.dart';
@@ -8,6 +9,8 @@ import 'savings_category_detail.dart';
 import 'analysis_page.dart';
 import 'transactions_page.dart';
 import 'profile_page.dart';
+import 'add_expense.dart';
+import 'add_savings.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -20,7 +23,41 @@ class _DashboardState extends State<Dashboard> {
   final AuthService _authService = AuthService();
   final ExpenseService _expenseService = ExpenseService();
   final SavingsService _savingsService = SavingsService();
-  int _currentIndex = 3; // Categories tab is selected
+  int _currentIndex = 0; // Home tab is selected
+  Timer? _updateTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+    // Set up periodic refresh every 1 second for real-time updates
+    _updateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        _loadData();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _updateTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadData() async {
+    // Refresh data from Firebase
+    await _expenseService.initialize();
+    await _savingsService.initialize();
+    await _authService.updateUserStatistics();
+    
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void _refresh() async {
+    await _loadData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,25 +106,13 @@ class _DashboardState extends State<Dashboard> {
                               Row(
                                 children: [
                                   Text(
-                                    '\$${_authService.currentUser?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
+                                    '₱${_authService.currentUser?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: 'Poppins',
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.refresh,
-                                      color: Colors.white,
-                                      size: 22,
-                                    ),
-                                    tooltip: 'Refresh',
-                                    onPressed: () {
-                                      setState(() {});
-                                    },
                                   ),
                                 ],
                               ),
@@ -176,16 +201,17 @@ class _DashboardState extends State<Dashboard> {
 
           // Content based on selected tab
           Expanded(
-            child:
-                _currentIndex == 4
-                    ? _buildHomeContent()
-                    : _currentIndex == 1
+            child: _currentIndex == 0
+                ? _buildHomeContent()
+                : _currentIndex == 1
                     ? const AnalysisPage()
                     : _currentIndex == 2
-                    ? const TransactionsPage()
-                    : _currentIndex == 4
-                    ? _buildSavingsContent()
-                    : _buildExpensesContent(),
+                        ? const TransactionsPage()
+                        : _currentIndex == 3
+                            ? _buildExpensesContent()
+                            : _currentIndex == 4
+                                ? _buildSavingsContent()
+                                : _buildExpensesContent(),
           ),
 
           // Bottom Navigation
@@ -198,7 +224,7 @@ class _DashboardState extends State<Dashboard> {
                 _buildNavItem(Icons.home, 'Home', 0),
                 _buildNavItem(Icons.bar_chart, 'Statistics', 1),
                 _buildNavItem(Icons.swap_horiz, 'Transactions', 2),
-                _buildNavItem(Icons.category, 'Categories', 3),
+                _buildNavItem(Icons.category, 'Expenses', 3),
                 _buildNavItem(Icons.savings, 'Savings', 4),
                 _buildNavItem(Icons.person, 'Profile', 5),
               ],
@@ -328,7 +354,12 @@ class _DashboardState extends State<Dashboard> {
                   title: const Text('Profile'),
                   onTap: () {
                     Navigator.pop(context);
-                    // TODO: Navigate to profile screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProfilePage(),
+                      ),
+                    );
                   },
                 ),
                 ListTile(
@@ -409,7 +440,7 @@ class _DashboardState extends State<Dashboard> {
           return _buildCategoryCard(
             icon: _getCategoryIcon(category),
             title: category,
-            subtitle: '\₱${totalAmount.toStringAsFixed(2)}',
+            subtitle: '₱${totalAmount.toStringAsFixed(2)}',
             onTap: () {
               Navigator.push(
                 context,
@@ -550,7 +581,7 @@ class _DashboardState extends State<Dashboard> {
             ),
             const SizedBox(height: 8),
             Text(
-              '\₱${amount.toStringAsFixed(2)}',
+              '₱${amount.toStringAsFixed(2)}',
               style: const TextStyle(
                 fontSize: 14,
                 fontFamily: 'Poppins',
@@ -603,7 +634,7 @@ class _DashboardState extends State<Dashboard> {
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     labelText: 'Target Amount',
-                    prefixText: '\₱',
+                    prefixText: '₱',
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -679,6 +710,12 @@ class _DashboardState extends State<Dashboard> {
 
   Widget _buildHomeHeader() {
     final darkGreen = const Color(0xFF006231);
+    final yellow = const Color(0xFFFFD700);
+    
+    final monthlySalary = _authService.currentUser?.monthlySalary ?? 0.0;
+    final totalIncome = _authService.currentUser?.totalIncome ?? 0.0;
+    final savingsRate = _authService.currentUser?.savingsRate ?? 0.0;
+    
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 48, 24, 24),
@@ -702,9 +739,9 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Good Morning',
-            style: TextStyle(
+          Text(
+            'Good ${_getGreeting()}',
+            style: const TextStyle(
               color: Colors.white70,
               fontSize: 14,
               fontFamily: 'Poppins',
@@ -718,7 +755,7 @@ class _DashboardState extends State<Dashboard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Total Balance',
+                    'Monthly Salary',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -727,7 +764,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '₱${_authService.currentUser?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
+                    '₱${monthlySalary.toStringAsFixed(2)}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -741,7 +778,7 @@ class _DashboardState extends State<Dashboard> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   const Text(
-                    'Total Expense',
+                    'Total Balance',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -750,7 +787,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '-₱${_authService.currentUser?.totalExpense.toStringAsFixed(2) ?? '0.00'}',
+                    '₱${_authService.currentUser?.totalBalance.toStringAsFixed(2) ?? '0.00'}',
                     style: const TextStyle(
                       color: Color(0xFFFFD700),
                       fontSize: 24,
@@ -805,18 +842,20 @@ class _DashboardState extends State<Dashboard> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            'You Have Consumed ${_authService.currentUser?.progressPercentage.toStringAsFixed(0) ?? '0'}% Of Your Budget This Week',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontFamily: 'Poppins',
-            ),
-          ),
         ],
       ),
     );
+  }
+
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Morning';
+    } else if (hour < 17) {
+      return 'Afternoon';
+    } else {
+      return 'Evening';
+    }
   }
 
   Widget _buildHomeContent() {
@@ -824,40 +863,104 @@ class _DashboardState extends State<Dashboard> {
     final darkGreen = const Color(0xFF006231);
     final yellow = const Color(0xFFFFD700);
 
-    // Dummy data for demonstration, replace with your actual data
-    final recentTransactions = [
-      {
-        'icon': Icons.attach_money,
-        'title': 'Salary',
-        'time': '18:27 - April 30',
-        'category': 'Monthly',
-        'amount': 4000.00,
-        'isIncome': true,
-      },
-      {
-        'icon': Icons.shopping_bag,
-        'title': 'Groceries',
-        'time': '17:00 - April 24',
-        'category': 'Pantry',
-        'amount': -100.00,
-        'isIncome': false,
-      },
-      {
-        'icon': Icons.home,
-        'title': 'Rent',
-        'time': '8:30 - April 15',
-        'category': 'Rent',
-        'amount': -674.40,
-        'isIncome': false,
-      },
-    ];
+    // Calculate real statistics
+    final totalExpenses = _authService.currentUser?.totalExpense ?? 0.0;
+    final totalSavings = _savingsService.getTotalSavings();
+    final totalBalance = _authService.currentUser?.totalBalance ?? 0.0;
+    
+    // Calculate weekly statistics
+    final now = DateTime.now();
+    final weekStart = now.subtract(Duration(days: now.weekday - 1));
+    final weekEnd = weekStart.add(const Duration(days: 6));
+    
+    // Get recent transactions (last 5)
+    final recentExpenses = _expenseService.expenses.take(3).toList();
+    final recentSavings = _savingsService.savings.take(2).toList();
+    
+    // Calculate savings progress
+    final totalSavingsTarget = _savingsService.categories.fold<double>(
+      0.0, (sum, category) => sum + _savingsService.getTargetAmount(category));
+    final savingsProgress = totalSavingsTarget > 0 ? (totalSavings / totalSavingsTarget) : 0.0;
 
     return Container(
       color: lightGreen,
       child: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          // Middle Card
+          // Quick Actions Card
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Quick Actions',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Poppins',
+                    color: Color(0xFF006231),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildQuickActionButton(
+                        icon: Icons.add_circle_outline,
+                        label: 'Add Expense',
+                        color: const Color(0xFFFF6B6B),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AddExpense(),
+                            ),
+                          ).then((_) {
+                            _refresh();
+                            setState(() {});
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildQuickActionButton(
+                        icon: Icons.savings,
+                        label: 'Add Savings',
+                        color: const Color(0xFF4ECDC4),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AddSavings(),
+                            ),
+                          ).then((_) {
+                            _refresh();
+                            setState(() {});
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          
+          // Statistics Card
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -873,7 +976,7 @@ class _DashboardState extends State<Dashboard> {
             padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                // Savings on Goals
+                // Savings Progress
                 Expanded(
                   child: Column(
                     children: [
@@ -884,15 +987,15 @@ class _DashboardState extends State<Dashboard> {
                             width: 56,
                             height: 56,
                             child: CircularProgressIndicator(
-                              value: 0.5, // Replace with actual value
+                              value: savingsProgress.clamp(0.0, 1.0),
                               strokeWidth: 6,
                               backgroundColor: lightGreen,
                               valueColor: AlwaysStoppedAnimation<Color>(yellow),
                             ),
                           ),
-                          const Text(
-                            '50%',
-                            style: TextStyle(
+                          Text(
+                            '${(savingsProgress * 100).clamp(0.0, 100.0).toStringAsFixed(0)}%',
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Poppins',
                               fontSize: 16,
@@ -903,7 +1006,7 @@ class _DashboardState extends State<Dashboard> {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Savings\nOn Goals',
+                        'Savings\nProgress',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 12,
@@ -915,7 +1018,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                // Revenue & Food
+                // Balance & Expenses
                 Expanded(
                   flex: 2,
                   child: Column(
@@ -929,9 +1032,9 @@ class _DashboardState extends State<Dashboard> {
                           const SizedBox(width: 8),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text(
-                                'Revenue Last Week',
+                            children: [
+                              const Text(
+                                'Monthly Salary',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.black54,
@@ -939,8 +1042,8 @@ class _DashboardState extends State<Dashboard> {
                                 ),
                               ),
                               Text(
-                                '₱4,000.00',
-                                style: TextStyle(
+                                '₱${(_authService.currentUser?.monthlySalary ?? 0.0).toStringAsFixed(2)}',
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Poppins',
                                   fontSize: 16,
@@ -955,15 +1058,15 @@ class _DashboardState extends State<Dashboard> {
                       Row(
                         children: [
                           const Icon(
-                            Icons.restaurant,
-                            color: Color(0xFF006231),
+                            Icons.trending_down,
+                            color: Color(0xFFFF6B6B),
                           ),
                           const SizedBox(width: 8),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text(
-                                'Food Last Week',
+                            children: [
+                              const Text(
+                                'Monthly Expenses',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.black54,
@@ -971,12 +1074,44 @@ class _DashboardState extends State<Dashboard> {
                                 ),
                               ),
                               Text(
-                                '-₱100.00',
-                                style: TextStyle(
+                                '₱${(_authService.currentUser?.totalExpense ?? 0.0).toStringAsFixed(2)}',
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Poppins',
                                   fontSize: 16,
-                                  color: Color(0xFFFFD700),
+                                  color: Color(0xFFFF6B6B),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.savings,
+                            color: Color(0xFF4ECDC4),
+                          ),
+                          const SizedBox(width: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Savings Rate',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.black54,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                              Text(
+                                '${(_authService.currentUser?.savingsRate ?? 0.0).toStringAsFixed(1)}%',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  color: Color(0xFF4ECDC4),
                                 ),
                               ),
                             ],
@@ -990,76 +1125,73 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
           const SizedBox(height: 24),
-          // Filter Tabs
+          
+          // Recent Transactions Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildFilterTab('Daily', false),
-              _buildFilterTab('Weekly', false),
-              _buildFilterTab('Monthly', true),
+              const Text(
+                'Recent Transactions',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Poppins',
+                  color: Color(0xFF006231),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _currentIndex = 2; // Switch to Transactions tab
+                  });
+                },
+                child: const Text(
+                  'View All',
+                  style: TextStyle(
+                    color: Color(0xFF006231),
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
-          // Recent Transactions
-          ...recentTransactions.map(
-            (tx) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Row(
+          
+          // Recent Transactions List
+          ..._buildRecentTransactions(recentExpenses, recentSavings),
+          
+          if (recentExpenses.isEmpty && recentSavings.isEmpty)
+            Container(
+              padding: const EdgeInsets.all(32),
+              child: Column(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: const EdgeInsets.all(12),
-                    child: Icon(tx['icon'] as IconData, color: darkGreen),
+                  Icon(
+                    Icons.receipt_long,
+                    size: 64,
+                    color: Colors.grey[400],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          tx['title'] as String,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                          ),
-                        ),
-                        Text(
-                          tx['time'] as String,
-                          style: const TextStyle(
-                            color: Colors.black54,
-                            fontSize: 12,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                        Text(
-                          tx['category'] as String,
-                          style: const TextStyle(
-                            color: Colors.black45,
-                            fontSize: 12,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const SizedBox(height: 16),
                   Text(
-                    (tx['isIncome'] as bool ? '+' : '') +
-                        '₱${(tx['amount'] as num).abs().toStringAsFixed(2)}',
+                    'No transactions yet',
                     style: TextStyle(
-                      color: tx['isIncome'] as bool ? darkGreen : yellow,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.grey[600],
                       fontFamily: 'Poppins',
-                      fontSize: 14,
                     ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Add your first expense or savings to get started',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[500],
+                      fontFamily: 'Poppins',
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
             ),
-          ),
         ],
       ),
     );
@@ -1084,5 +1216,167 @@ class _DashboardState extends State<Dashboard> {
         ),
       ),
     );
+  }
+
+  Widget _buildQuickActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildRecentTransactions(List recentExpenses, List recentSavings) {
+    final allTransactions = <Map<String, dynamic>>[];
+    
+    // Add expenses
+    for (final expense in recentExpenses) {
+      allTransactions.add({
+        'icon': _getCategoryIcon(expense.category),
+        'title': expense.title,
+        'time': _formatTransactionDate(expense.date),
+        'category': expense.category,
+        'amount': -expense.amount,
+        'isIncome': false,
+        'type': 'expense',
+      });
+    }
+    
+    // Add savings
+    for (final saving in recentSavings) {
+      allTransactions.add({
+        'icon': Icons.savings,
+        'title': saving.title,
+        'time': _formatTransactionDate(saving.date),
+        'category': saving.category,
+        'amount': saving.amount,
+        'isIncome': true,
+        'type': 'savings',
+      });
+    }
+    
+    // Sort by date (most recent first)
+    allTransactions.sort((a, b) => b['time'].compareTo(a['time']));
+    
+    // Take only the first 5
+    final recentTransactions = allTransactions.take(5).toList();
+    
+    return recentTransactions.map((tx) => Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: tx['isIncome'] ? const Color(0xFF4ECDC4).withOpacity(0.1) : const Color(0xFFFF6B6B).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Icon(
+                tx['icon'] as IconData,
+                color: tx['isIncome'] ? const Color(0xFF4ECDC4) : const Color(0xFFFF6B6B),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    tx['title'] as String,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    tx['time'] as String,
+                    style: const TextStyle(
+                      color: Colors.black54,
+                      fontSize: 12,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                  Text(
+                    tx['category'] as String,
+                    style: const TextStyle(
+                      color: Colors.black45,
+                      fontSize: 12,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              (tx['isIncome'] as bool ? '+' : '') +
+                  '₱${(tx['amount'] as num).abs().toStringAsFixed(2)}',
+              style: TextStyle(
+                color: tx['isIncome'] as bool ? const Color(0xFF4ECDC4) : const Color(0xFFFF6B6B),
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
+    )).toList();
+  }
+
+  String _formatTransactionDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+    
+    if (difference.inDays == 0) {
+      return 'Today';
+    } else if (difference.inDays == 1) {
+      return 'Yesterday';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} days ago';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
   }
 }

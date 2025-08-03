@@ -41,13 +41,12 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCquSlUTDv4mW12CaO_1YlEeIw1OFkTbL0',
-    appId: '1:966193389957:web:f3463dabbaa11fc35fa4ec',
-    messagingSenderId: '966193389957',
-    projectId: 'limitly-f5acc-b2ffc',
-    authDomain: 'limitly-f5acc-b2ffc.firebaseapp.com',
-    storageBucket: 'limitly-f5acc-b2ffc.firebasestorage.app',
-    measurementId: 'G-5RC27JFE57',
+    apiKey: "AIzaSyAX37swk-j2nVenyV2x5DJA9A_ZCzF_TMU",
+    authDomain: "limitly-f5acc.firebaseapp.com",
+    projectId: "limitly-f5acc",
+    storageBucket: "limitly-f5acc.appspot.com",
+    messagingSenderId: "296728430407",
+    appId: "1:296728430407:web:8dbf5a2fe108d39800ee62",
   );
 
   static const FirebaseOptions android = FirebaseOptions(

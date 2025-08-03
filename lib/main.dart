@@ -9,22 +9,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (kIsWeb) {
-    await Firebase.initializeApp(
-      options: const FirebaseOptions(
-        apiKey: "AIzaSyAX37swk-j2nVenyV2x5DJA9A_ZCzF_TMU",
-        authDomain: "limitly-f5acc.firebaseapp.com",
-        projectId: "limitly-f5acc",
-        storageBucket: "limitly-f5acc.appspot.com",
-        messagingSenderId: "296728430407",
-        appId: "1:296728430407:web:8dbf5a2fe108d39800ee62",
-      ),
-    );
-  } else {
-    await Firebase.initializeApp();
-  }
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -46,7 +35,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class AuthWrapper extends StatelessWidget {
+class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
 
   @override
@@ -70,12 +59,23 @@ class _AuthWrapperState extends State<AuthWrapper> {
       ]);
 
       try {
+        // Test Firebase connection
         final snapshot = await FirebaseFirestore.instance.collection('users').get();
-        for (var doc in snapshot.docs) {
-          debugPrint('User doc: ${doc.id} => ${doc.data()}');
-        }
+        debugPrint('Firebase connection successful! Found ${snapshot.docs.length} users');
+        
+        // Test adding a test document
+        await FirebaseFirestore.instance.collection('test').doc('connection_test').set({
+          'timestamp': DateTime.now().toIso8601String(),
+          'status': 'connected',
+        });
+        debugPrint('Firebase write test successful!');
+        
+        // Clean up test document
+        await FirebaseFirestore.instance.collection('test').doc('connection_test').delete();
+        debugPrint('Firebase cleanup successful!');
+        
       } catch (e) {
-        debugPrint('Firestore test failed: $e');
+        debugPrint('Firebase test failed: $e');
       }
 
       setState(() {
@@ -98,7 +98,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Widget build(BuildContext context) {
     final authService = AuthService();
     
-if (!_initialized) {
+    if (!_initialized) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );

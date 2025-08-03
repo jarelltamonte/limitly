@@ -30,34 +30,9 @@ class _AddSavingsState extends State<AddSavings> {
     _selectedCategory = widget.selectedCategory;
     _dateController.text = _formatDate(_selectedDate);
     _categoryController.text = _selectedCategory ?? '';
-    
-    // Pre-fill based on category
-    if (_selectedCategory != null) {
-      switch (_selectedCategory!.toLowerCase()) {
-        case 'travel':
-          _amountController.text = '231.17';
-          _titleController.text = 'Travel Deposit';
-          break;
-        case 'house':
-          _amountController.text = '231.17';
-          _titleController.text = 'House Deposit';
-          break;
-        case 'car':
-          _amountController.text = '397.32';
-          _titleController.text = 'Car Deposit';
-          break;
-        case 'wedding':
-          _amountController.text = '183.32';
-          _titleController.text = 'Wedding Deposit';
-          break;
-        default:
-          _amountController.text = '100.00';
-          _titleController.text = 'Savings Deposit';
-      }
-    } else {
-      _amountController.text = '100.00';
-      _titleController.text = 'Savings Deposit';
-    }
+    _amountController.text = '';
+    _titleController.text = '';
+    _messageController.text = '';
   }
 
   @override
@@ -296,7 +271,7 @@ class _AddSavingsState extends State<AddSavings> {
                         FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                       ],
                       decoration: InputDecoration(
-                        prefixText: '\₱',
+                        prefixText: '₱',
                         filled: true,
                         fillColor: fieldGreen,
                         border: OutlineInputBorder(
