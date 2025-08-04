@@ -29,6 +29,12 @@ class ExpenseService {
   }
 
   Future<void> loadExpenses() async {
+    // Skip if already loaded
+    if (_expenses.isNotEmpty) {
+      print('Expenses already loaded, skipping Firebase call');
+      return;
+    }
+    
     try {
       print('Loading expenses from Firebase...');
       final snapshot = await _firestore.collection('expenses').get();
@@ -55,6 +61,12 @@ class ExpenseService {
   }
 
   Future<void> loadCategories() async {
+    // Skip if already loaded
+    if (_categories.isNotEmpty) {
+      print('Categories already loaded, skipping Firebase call');
+      return;
+    }
+    
     try {
       print('Loading expense categories from Firebase...');
       final snapshot = await _firestore.collection('expense_categories').get();

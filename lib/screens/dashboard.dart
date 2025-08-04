@@ -30,8 +30,8 @@ class _DashboardState extends State<Dashboard> {
   void initState() {
     super.initState();
     _loadData();
-    // Set up periodic refresh every 1 second for real-time updates
-    _updateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    // Set up periodic refresh every 30 seconds for real-time updates
+    _updateTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
       if (mounted) {
         _loadData();
       }
@@ -45,9 +45,13 @@ class _DashboardState extends State<Dashboard> {
   }
 
   Future<void> _loadData() async {
-    // Refresh data from Firebase
-    await _expenseService.initialize();
-    await _savingsService.initialize();
+    // Refresh data from Firebase only if not already loaded
+    if (_expenseService.expenses.isEmpty) {
+      await _expenseService.initialize();
+    }
+    if (_savingsService.savings.isEmpty) {
+      await _savingsService.initialize();
+    }
     await _authService.updateUserStatistics();
     
     if (mounted) {
@@ -119,6 +123,18 @@ class _DashboardState extends State<Dashboard> {
                             ],
                           ),
                         ],
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.refresh, color: Colors.white),
+                        onPressed: () async {
+                          await _loadData();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Data refreshed'),
+                              duration: Duration(seconds: 1),
+                            ),
+                          );
+                        },
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -729,14 +745,31 @@ class _DashboardState extends State<Dashboard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Hi, Welcome Back',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Poppins',
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Hi, Welcome Back',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.white),
+                onPressed: () async {
+                  await _loadData();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Data refreshed'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(

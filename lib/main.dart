@@ -5,6 +5,7 @@ import 'package:limitly_development/screens/dashboard.dart';
 import 'package:flutter/foundation.dart';
 import 'package:limitly_development/services/expense_service.dart';
 import 'package:limitly_development/services/savings_service.dart';
+import 'package:limitly_development/services/firebase_status.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -59,20 +60,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
       ]);
 
       try {
-        // Test Firebase connection
-        final snapshot = await FirebaseFirestore.instance.collection('users').get();
-        debugPrint('Firebase connection successful! Found ${snapshot.docs.length} users');
-        
-        // Test adding a test document
-        await FirebaseFirestore.instance.collection('test').doc('connection_test').set({
-          'timestamp': DateTime.now().toIso8601String(),
-          'status': 'connected',
-        });
-        debugPrint('Firebase write test successful!');
-        
-        // Clean up test document
-        await FirebaseFirestore.instance.collection('test').doc('connection_test').delete();
-        debugPrint('Firebase cleanup successful!');
+        // Test Firebase connection and quota status
+        await FirebaseStatus.checkAllAccess();
+        await FirebaseStatus.checkQuotaStatus();
         
       } catch (e) {
         debugPrint('Firebase test failed: $e');

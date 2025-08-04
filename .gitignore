@@ -43,3 +43,18 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase service account keys (security)
+lib/firebase-populate/*.json
+*.json
+!pubspec.lock
+!firebase.json
+!package.json
+
+# Node.js files
+node_modules/
+package-lock.json
+
+# Build artifacts
+build/
+.dart_tool/

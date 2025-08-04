@@ -41,6 +41,12 @@ class SavingsService {
   }
 
   Future<void> loadSavings() async {
+    // Skip if already loaded
+    if (_savings.isNotEmpty) {
+      print('Savings already loaded, skipping Firebase call');
+      return;
+    }
+    
     try {
       print('Loading savings from Firebase...');
       final snapshot = await _firestore.collection('savings').get();
@@ -67,6 +73,12 @@ class SavingsService {
   }
 
   Future<void> loadCategories() async {
+    // Skip if already loaded
+    if (_categories.isNotEmpty) {
+      print('Savings categories already loaded, skipping Firebase call');
+      return;
+    }
+    
     try {
       print('Loading savings categories from Firebase...');
       final snapshot = await _firestore.collection('savings_categories').get();
